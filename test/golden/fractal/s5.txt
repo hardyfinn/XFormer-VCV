@@ -1,0 +1,135 @@
+engine fractal
+ticks 12000
+sourceA 0
+p playMode 0
+p slideTime 0
+p scale 3
+p rootNote 7
+p lastStep 12
+p runMode 3
+p divisor 24
+p resetMeasure 2
+p octave 1
+p transpose 2
+p accEnabled 0
+p accMode 0
+p accDirection 2
+p accOrder 1
+p accTrigger 0
+p accMin -1
+p accMax 9
+p accStep 2
+p step 0 gate 0
+p step 0 note 4
+p step 0 gateProbability 5
+p step 0 condition 22
+p step 0 gateMode 3
+p step 1 gate 0
+p step 1 note 8
+p step 1 retriggerProbability 5
+p step 1 length 7
+p step 1 lengthVariationRange -7
+p step 1 accumulator -4
+p step 2 gate 1
+p step 2 note -8
+p step 2 retriggerProbability 4
+p step 2 length 5
+p step 2 gateMode 3
+p step 3 gate 1
+p step 3 note 3
+p step 3 slide 1
+p step 3 retrigger 1
+p step 3 accumulator -3
+p step 4 gate 1
+p step 4 note -8
+p step 4 gateOffset 2
+p step 4 retrigger 0
+p step 4 retriggerProbability 6
+p step 4 noteVariationRange -2
+p step 5 gate 1
+p step 5 note 1
+p step 5 gateOffset 2
+p step 5 retrigger 1
+p step 5 noteVariationRange 4
+p step 5 accumulator -1
+p step 6 gate 1
+p step 6 note 3
+p step 6 gateOffset 7
+p step 6 noteVariationRange 0
+p step 7 gate 1
+p step 7 note 9
+p step 7 gateProbability 5
+p step 7 retriggerProbability 2
+p step 7 lengthVariationProbability 6
+p step 7 noteVariationRange -4
+p step 8 gate 1
+p step 8 note -5
+p step 8 retrigger 2
+p step 8 length 2
+p step 8 lengthVariationRange 7
+p step 8 lengthVariationProbability 1
+p step 8 accumulator -7
+p step 8 gateMode 0
+p step 9 gate 1
+p step 9 note 2
+p step 9 retrigger 1
+p step 9 condition 42
+p step 9 accumulator -5
+p step 10 gate 0
+p step 10 note -1
+p step 10 slide 1
+p step 10 retriggerProbability 7
+p step 10 length 4
+p step 10 noteVariationRange -2
+p step 10 pulseCount 3
+p step 10 gateMode 1
+p step 11 gate 0
+p step 11 note -10
+p step 11 slide 1
+p step 11 noteVariationRange -1
+p step 11 accumulator -4
+p step 11 gateMode 0
+p step 12 gate 1
+p step 12 note 1
+p step 12 noteVariationRange 2
+p step 12 gateMode 0
+p step 13 gate 1
+p step 13 note -8
+p step 13 gateOffset 4
+p step 13 retriggerProbability 3
+p step 13 noteVariationRange 4
+p step 13 accumulator 6
+p step 14 gate 1
+p step 14 note 11
+p step 14 gateProbability 4
+p step 14 retrigger 1
+p step 14 length 6
+p step 14 noteVariationProbability 6
+p step 14 accumulator -3
+p step 15 gate 1
+p step 15 note 10
+p step 15 gateProbability 5
+p step 15 retriggerProbability 6
+p step 16 gate 1
+p step 16 note -3
+p step 16 length 7
+p step 16 noteVariationRange 5
+p step 17 gate 1
+p step 17 note 5
+p step 17 gateOffset 2
+p step 17 length 1
+p step 17 accumulator -1
+scale 0
+rootNote 8
+record 1
+divisor 12
+loopFirst 0
+loopLast 8
+recordMode 1
+cadence 0
+fidelity 0
+lock 1
+quantize 1
+trackDelay 2
+octave 1
+transpose 5

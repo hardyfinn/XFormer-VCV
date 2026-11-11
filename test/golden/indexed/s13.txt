@@ -1,0 +1,36 @@
+engine indexed
+ticks 6000
+scale 3
+rootNote 9
+activeLength 9
+loop 0
+divisor 1
+octave 0
+transpose 4
+step 0 duration 144
+step 0 gateLength 22
+step 0 noteIndex -1
+step 1 duration 0
+step 1 gateLength 0
+step 1 noteIndex -8
+step 2 duration 0
+step 2 gateLength 0
+step 2 noteIndex -7
+step 3 duration 133
+step 3 gateLength 79
+step 3 noteIndex -9
+step 4 duration 24
+step 4 gateLength 39
+step 4 noteIndex -11
+step 5 duration 96
+step 5 gateLength 51
+step 5 noteIndex -4
+step 6 duration 144
+step 6 gateLength 138
+step 6 noteIndex 5
+step 7 duration 23
+step 7 gateLength 20
+step 7 noteIndex 8
+step 8 duration 48
+step 8 gateLength 66
+step 8 noteIndex 5

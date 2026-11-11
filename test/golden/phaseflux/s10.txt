@@ -1,0 +1,102 @@
+engine phaseflux
+ticks 12000
+scale 4
+rootNote 8
+divisor 24
+clockMult 101
+pitchMode 1
+responseNudge 34
+noteAccScope 0
+noteAccOrder 3
+noteAccPolarity 1
+noteAccReset 1
+noteAccPos 1
+noteAccNeg 5
+octave 1
+transpose -5
+stage 0 skip 0
+stage 0 pulseCount 2
+stage 0 length 4
+stage 0 basePitch 10
+stage 0 temporalCurve 0
+stage 0 accumulatorStep 2
+stage 0 gateLength 0
+stage 0 temporalRepeat 1
+stage 1 skip 0
+stage 1 pulseCount 3
+stage 1 length 1
+stage 1 basePitch 10
+stage 1 pitchCurve 1
+stage 1 temporalFlipH 1
+stage 1 maskMelody 72
+stage 1 tiltMelody 55
+stage 1 gateLength 0
+stage 1 temporalRepeat 1
+stage 2 skip 0
+stage 2 pulseCount 2
+stage 2 length 7
+stage 2 basePitch -6
+stage 2 pitchDirection 2
+stage 2 pitchFlipV 1
+stage 2 temporalFlipV 1
+stage 2 accumulatorStep -4
+stage 3 skip 0
+stage 3 pulseCount 7
+stage 3 length 8
+stage 3 pitchDirection 0
+stage 3 pitchFlipV 1
+stage 3 pitchWarp 34
+stage 3 pitchResponse -32
+stage 3 accumulatorStep 3
+stage 3 gateLength 50
+stage 8 skip 0
+stage 8 pulseCount 4
+stage 8 length 4
+stage 8 pitchRange 2
+stage 8 pitchFlipV 1
+stage 8 temporalFlipV 1
+stage 8 temporalWarp 1
+stage 8 mask 3
+stage 8 pulseAccumStep 0
+stage 8 pulseAccumTrigger 1
+stage 8 gateLength 100
+stage 8 pitchRepeat 2
+stage 11 skip 0
+stage 11 pulseCount 8
+stage 11 length 11
+stage 11 pitchRange 1
+stage 11 pitchCurve 3
+stage 11 temporalCurve 1
+stage 11 pulseAccumStep 1
+stage 11 gateLength 0
+stage 11 temporalRepeat 0
+stage 11 temporalWindow 4
+stage 13 skip 0
+stage 13 pulseCount 0
+stage 13 length 2
+stage 13 basePitch -8
+stage 13 pitchRange 0
+stage 13 pitchDirection 2
+stage 13 pitchWarp -35
+stage 13 temporalCurve 0
+stage 13 temporalFlipV 1
+stage 13 temporalFlipH 1
+stage 13 tiltMelody 95
+stage 13 mask 7
+stage 13 accumulatorTrigger 1
+stage 13 gateLength 10
+stage 15 skip 1
+stage 15 pulseCount 0
+stage 15 length 4
+stage 15 basePitch 5
+stage 15 pitchRange 1
+stage 15 pitchDirection 0
+stage 15 pitchFlipH 1
+stage 15 temporalFlipH 1
+stage 15 temporalWarp 22
+stage 15 temporalResponse 26
+stage 15 phaseShift 2
+stage 15 mask 3
+stage 15 gateLength 50
+stage 15 pitchRepeat 2
+stage 15 temporalWindow 3

@@ -1,0 +1,105 @@
+engine phaseflux
+ticks 6000
+scale 7
+rootNote 3
+divisor 12
+firstStage 0
+lastStage 5
+noteAccScope 0
+noteAccOrder 0
+noteAccPolarity 0
+noteAccReset 0
+noteAccPos 2
+noteAccNeg 1
+octave 0
+transpose 0
+stage 0 skip 0
+stage 0 pulseCount 2
+stage 0 length 4
+stage 0 pitchFlipH 1
+stage 0 pitchWarp -21
+stage 0 temporalCurve 0
+stage 0 temporalWarp 10
+stage 0 phaseShift 6
+stage 0 maskShift 2
+stage 0 pulseAccumStep 3
+stage 0 accumulatorTrigger 1
+stage 0 pulseAccumTrigger 1
+stage 1 skip 0
+stage 1 pulseCount 3
+stage 1 length 8
+stage 1 basePitch 9
+stage 1 pitchResponse 38
+stage 1 maskShift 1
+stage 1 accumulatorStep -2
+stage 1 gateLength 90
+stage 1 pitchRepeat 3
+stage 1 temporalWindow 2
+stage 2 skip 0
+stage 2 pulseCount 1
+stage 2 length 8
+stage 2 pitchRange 1
+stage 2 pitchWarp -13
+stage 2 temporalCurve 1
+stage 2 pulseAccumStep 1
+stage 2 pulseAccumTrigger 1
+stage 2 gateLength 0
+stage 2 pitchRepeat 3
+stage 3 skip 0
+stage 3 pulseCount 1
+stage 3 length 4
+stage 3 pitchFlipV 1
+stage 3 pitchResponse -47
+stage 3 mask 1
+stage 3 temporalRepeat 0
+stage 5 skip 0
+stage 5 pulseCount 7
+stage 5 length 4
+stage 5 basePitch 4
+stage 5 pitchFlipV 1
+stage 5 pitchWarp -37
+stage 5 temporalFlipV 1
+stage 5 maskMelody 8
+stage 5 mask 1
+stage 5 maskShift 3
+stage 5 gateLength 50
+stage 7 skip 0
+stage 7 pulseCount 4
+stage 7 length 12
+stage 7 basePitch -8
+stage 7 pitchDirection 1
+stage 7 maskMelody 28
+stage 7 tiltMelody 68
+stage 7 mask 3
+stage 11 skip 0
+stage 11 pulseCount 5
+stage 11 length 4
+stage 11 basePitch -3
+stage 11 temporalCurve 2
+stage 11 accumulatorStep -1
+stage 11 pulseAccumTrigger 1
+stage 12 skip 1
+stage 12 pulseCount 7
+stage 12 length 2
+stage 12 basePitch 5
+stage 12 pitchRange 3
+stage 12 temporalCurve 2
+stage 12 temporalFlipV 1
+stage 12 temporalWarp 54
+stage 12 maskMelody 18
+stage 12 tiltMelody 35
+stage 12 accumulatorTrigger 1
+stage 12 pitchRepeat 2
+stage 14 skip 0
+stage 14 pulseCount 6
+stage 14 length 1
+stage 14 basePitch 3
+stage 14 pitchCurve 2
+stage 14 pitchWarp 13
+stage 14 temporalFlipV 1
+stage 14 temporalFlipH 1
+stage 14 temporalWarp -15
+stage 14 mask 1
+stage 14 accumulatorStep -4
+stage 14 gateLength 50
+stage 14 temporalRepeat 3

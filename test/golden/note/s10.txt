@@ -1,0 +1,119 @@
+engine note
+ticks 12000
+playMode 0
+slideTime 0
+scale 0
+rootNote 9
+lastStep 5
+firstStep 2
+runMode 1
+resetMeasure 2
+octave 0
+transpose 0
+accEnabled 1
+accMode 0
+accDirection 1
+accOrder 1
+accTrigger 0
+accMin -1
+accMax 9
+accStep 1
+step 0 gate 0
+step 0 note 9
+step 0 length 6
+step 0 lengthVariationProbability 4
+step 0 accumulator -7
+step 0 gateMode 2
+step 1 gate 1
+step 1 note -1
+step 1 gateOffset 0
+step 1 retrigger 2
+step 1 noteVariationProbability 3
+step 1 accumulator -6
+step 1 gateMode 0
+step 2 gate 0
+step 2 note -7
+step 2 slide 1
+step 2 lengthVariationRange 5
+step 2 noteVariationProbability 4
+step 3 gate 1
+step 3 note 4
+step 3 gateProbability 5
+step 3 retriggerProbability 1
+step 3 length 4
+step 3 gateMode 3
+step 4 gate 1
+step 4 note 11
+step 4 length 6
+step 4 lengthVariationProbability 5
+step 5 gate 1
+step 5 note -9
+step 5 gateProbability 2
+step 5 gateOffset 0
+step 5 lengthVariationRange 5
+step 5 accumulator 7
+step 6 gate 1
+step 6 note -3
+step 6 gateProbability 0
+step 6 retrigger 0
+step 6 noteVariationProbability 6
+step 6 gateMode 3
+step 7 gate 1
+step 7 note 4
+step 7 lengthVariationProbability 5
+step 7 noteVariationProbability 2
+step 7 accumulator -5
+step 7 pulseCount 1
+step 8 gate 1
+step 8 note 6
+step 8 slide 1
+step 8 length 1
+step 8 lengthVariationProbability 4
+step 8 condition 37
+step 8 gateMode 2
+step 9 gate 0
+step 9 note 5
+step 9 retrigger 2
+step 9 length 6
+step 9 noteVariationRange -6
+step 9 noteVariationProbability 4
+step 9 accumulator -5
+step 10 gate 0
+step 10 note 4
+step 10 retriggerProbability 0
+step 10 length 6
+step 10 lengthVariationRange -1
+step 11 gate 1
+step 11 note -6
+step 11 length 7
+step 11 lengthVariationRange -6
+step 11 noteVariationProbability 7
+step 12 gate 1
+step 12 note 4
+step 12 noteVariationProbability 0
+step 12 condition 52
+step 12 accumulator 5
+step 12 gateMode 1
+step 13 gate 0
+step 13 note 7
+step 14 gate 0
+step 14 note -7
+step 14 gateOffset 1
+step 14 retrigger 2
+step 14 retriggerProbability 6
+step 14 length 0
+step 15 gate 1
+step 15 note 3
+step 15 length 2
+step 15 gateMode 0
+step 16 gate 1
+step 16 note -1
+step 16 gateProbability 2
+step 16 slide 1
+step 16 retrigger 1
+step 16 length 5
+step 16 noteVariationRange 3
+step 16 pulseCount 3
+step 17 gate 0
+step 17 note 1
+step 17 noteVariationRange 3

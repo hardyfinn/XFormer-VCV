@@ -1,0 +1,45 @@
+engine discrete
+ticks 6000
+scale 3
+rootNote 1
+clockSource 0
+playMode 0
+clockSource 2
+divisor 48
+gateLength 25
+loop 0
+syncMode 1
+resetMeasure 1
+octave 0
+transpose -4
+stage 0 direction 2
+stage 0 noteIndex 7
+stage 4 direction 2
+stage 4 noteIndex 9
+stage 6 direction 3
+stage 6 noteIndex 9
+stage 6 threshold -92
+stage 7 direction 0
+stage 7 noteIndex 11
+stage 8 direction 1
+stage 8 noteIndex 6
+stage 8 threshold -81
+stage 11 direction 1
+stage 11 noteIndex -8
+stage 21 direction 3
+stage 21 noteIndex 3
+stage 21 threshold 92
+stage 23 direction 0
+stage 23 noteIndex 14
+stage 23 threshold 64
+stage 24 direction 1
+stage 24 noteIndex 14
+stage 25 direction 3
+stage 25 noteIndex 10
+stage 27 direction 1
+stage 27 noteIndex 7
+stage 27 threshold 53
+stage 28 direction 1
+stage 28 noteIndex 10
+stage 29 direction 1
+stage 29 noteIndex -10

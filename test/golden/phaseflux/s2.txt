@@ -1,0 +1,101 @@
+engine phaseflux
+ticks 12000
+scale 4
+rootNote 1
+divisor 6
+traversal 1
+responseNudge -3
+resetMeasure 1
+octave -1
+transpose 3
+stage 0 skip 0
+stage 0 pulseCount 4
+stage 0 length 2
+stage 0 basePitch 7
+stage 0 pitchRange 2
+stage 0 pitchCurve 2
+stage 0 pitchFlipV 1
+stage 0 pitchResponse 52
+stage 0 temporalCurve 2
+stage 0 temporalFlipH 1
+stage 0 temporalResponse -15
+stage 0 tiltMelody 82
+stage 0 pulseAccumStep 3
+stage 0 gateLength 1
+stage 1 skip 0
+stage 1 pulseCount 0
+stage 1 length 2
+stage 1 pitchWarp 17
+stage 1 pitchResponse 46
+stage 1 temporalFlipV 1
+stage 1 temporalFlipH 1
+stage 1 temporalWarp -29
+stage 1 mask 5
+stage 1 accumulatorStep -5
+stage 2 skip 0
+stage 2 pulseCount 1
+stage 2 length 13
+stage 2 basePitch -2
+stage 2 pitchDirection 0
+stage 2 pitchFlipH 1
+stage 2 pitchWarp -38
+stage 2 temporalFlipH 1
+stage 2 temporalResponse -28
+stage 2 phaseShift 4
+stage 2 maskShift 2
+stage 2 gateLength 90
+stage 2 temporalRepeat 1
+stage 2 temporalWindow 3
+stage 3 skip 0
+stage 3 pulseCount 7
+stage 3 length 8
+stage 3 basePitch 2
+stage 3 pitchWarp -32
+stage 3 phaseShift 0
+stage 3 maskShift 7
+stage 3 gateLength 1
+stage 5 skip 1
+stage 5 pulseCount 2
+stage 5 length 8
+stage 5 basePitch -6
+stage 5 pitchResponse -3
+stage 5 tiltMelody 62
+stage 5 phaseShift 6
+stage 5 accumulatorStep -2
+stage 5 pulseAccumStep 3
+stage 5 accumulatorTrigger 1
+stage 5 gateLength 50
+stage 5 temporalWindow 1
+stage 6 skip 1
+stage 6 pulseCount 4
+stage 6 length 4
+stage 6 pitchRange 0
+stage 6 pitchCurve 1
+stage 6 pitchWarp 36
+stage 6 pitchResponse -1
+stage 6 temporalCurve 1
+stage 6 temporalResponse -58
+stage 6 tiltMelody 74
+stage 6 accumulatorStep 1
+stage 6 gateLength 1
+stage 10 skip 0
+stage 10 pulseCount 5
+stage 10 length 1
+stage 10 pitchFlipH 1
+stage 10 temporalCurve 1
+stage 10 tiltMelody 29
+stage 10 accumulatorStep 5
+stage 10 gateLength 50
+stage 10 pitchWindow 1
+stage 15 skip 0
+stage 15 pulseCount 3
+stage 15 length 4
+stage 15 basePitch -5
+stage 15 pitchRange 0
+stage 15 pitchCurve 2
+stage 15 pitchWarp -24
+stage 15 temporalWarp -28
+stage 15 maskMelody 76
+stage 15 tiltMelody 71
+stage 15 phaseShift 3
+stage 15 accumulatorStep 4

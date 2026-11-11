@@ -1,0 +1,79 @@
+engine phaseflux
+ticks 12000
+scale 6
+rootNote 3
+divisor 24
+clockMult 81
+cycleLength 1
+traversal 6
+globalPhase 79
+pulseAccScope 0
+pulseAccOrder 2
+pulseAccPolarity 0
+pulseAccReset 0
+pulseAccPos 8
+pulseAccNeg 6
+octave 0
+transpose -5
+stage 0 skip 0
+stage 0 pulseCount 0
+stage 0 length 2
+stage 0 basePitch 7
+stage 0 pitchRange 1
+stage 0 pitchResponse 41
+stage 0 temporalFlipH 1
+stage 0 temporalResponse -46
+stage 0 maskMelody 60
+stage 0 accumulatorStep 4
+stage 0 pulseAccumStep -1
+stage 0 accumulatorTrigger 1
+stage 1 skip 0
+stage 1 pulseCount 2
+stage 1 length 12
+stage 1 basePitch -9
+stage 1 pitchRange 1
+stage 1 pitchFlipV 1
+stage 1 pitchFlipH 1
+stage 1 pitchWarp -38
+stage 1 temporalResponse -28
+stage 1 maskMelody 46
+stage 1 tiltMelody 9
+stage 1 mask 0
+stage 1 pitchRepeat 0
+stage 2 skip 0
+stage 2 pulseCount 7
+stage 2 length 4
+stage 2 pitchRange 2
+stage 2 pitchDirection 2
+stage 2 pitchResponse -23
+stage 2 maskMelody 37
+stage 2 pulseAccumStep -1
+stage 3 skip 0
+stage 3 pulseCount 7
+stage 3 length 4
+stage 3 basePitch -4
+stage 3 pitchRange 2
+stage 3 pitchFlipV 1
+stage 3 pitchWarp 21
+stage 3 pitchResponse -7
+stage 3 tiltMelody 68
+stage 8 skip 0
+stage 8 pulseCount 1
+stage 8 length 1
+stage 8 pitchCurve 2
+stage 8 pitchFlipV 1
+stage 8 pitchFlipH 1
+stage 8 pulseAccumStep 0
+stage 8 gateLength 100
+stage 15 skip 0
+stage 15 pulseCount 1
+stage 15 length 11
+stage 15 pitchWarp 15
+stage 15 temporalCurve 0
+stage 15 temporalResponse -4
+stage 15 maskMelody 99
+stage 15 mask 2
+stage 15 pulseAccumStep -2
+stage 15 pulseAccumTrigger 1
+stage 15 gateLength 100
+stage 15 temporalWindow 1

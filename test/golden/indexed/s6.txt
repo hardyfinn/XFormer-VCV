@@ -1,0 +1,40 @@
+engine indexed
+ticks 12000
+scale 3
+rootNote 8
+activeLength 9
+runMode 3
+loop 0
+divisor 2
+clockMult 71
+syncMode 1
+resetMeasure 3
+octave 0
+transpose -4
+step 0 duration 192
+step 0 gateLength 44
+step 0 noteIndex 8
+step 1 duration 24
+step 1 gateLength 43
+step 1 noteIndex -11
+step 2 duration 192
+step 2 gateLength 22
+step 2 noteIndex -13
+step 3 duration 96
+step 3 gateLength 111
+step 3 noteIndex 11
+step 4 duration 96
+step 4 gateLength 98
+step 4 noteIndex -13
+step 5 duration 48
+step 5 gateLength 39
+step 5 noteIndex -9
+step 6 duration 267
+step 6 gateLength 6
+step 6 noteIndex -7
+step 7 duration 48
+step 7 gateLength 56
+step 7 noteIndex 9
+step 8 duration 48
+step 8 gateLength 21
+step 8 noteIndex 10

@@ -1,0 +1,59 @@
+{
+  "slug": "XFormer",
+  "name": "X|FORMER",
+  "version": "2.0.0",
+  "license": "GPL-3.0-or-later",
+  "brand": "Haer",
+  "author": "Haer",
+  "authorEmail": "",
+  "authorUrl": "",
+  "pluginUrl": "",
+  "manualUrl": "",
+  "sourceUrl": "https://github.com/hardyfinn/xformer-vcv",
+  "donateUrl": "",
+  "changelogUrl": "",
+  "modules": [
+    {
+      "slug": "Algo",
+      "name": "X|FORMER Algo",
+      "description": "16 generative melody algorithms (the X|FORMER Tuesday track), external clock, menu display, four CTRL knobs",
+      "tags": ["Sequencer", "Random"]
+    },
+    {
+      "slug": "Stochastic",
+      "name": "X|FORMER Stochastic",
+      "description": "Rhythm and melody rolled from weighted dice, live or captured into a loop",
+      "tags": ["Sequencer", "Random"]
+    },
+    {
+      "slug": "Note",
+      "name": "X|FORMER Note",
+      "description": "64-step sequencer with probabilities, conditions, ratchets and an accumulator",
+      "tags": ["Sequencer"]
+    },
+    {
+      "slug": "Indexed",
+      "name": "X|FORMER Indexed",
+      "description": "Steps with their own durations and gates, reshaped by two modulation inputs",
+      "tags": ["Sequencer"]
+    },
+    {
+      "slug": "Discrete",
+      "name": "X|FORMER Discrete",
+      "description": "A sweep (saw, triangle or CV input) crossing 32 note thresholds",
+      "tags": ["Sequencer", "Quantizer"]
+    },
+    {
+      "slug": "PhaseFlux",
+      "name": "X|FORMER PhaseFlux",
+      "description": "16 stages on a 4x4 grid, each a burst of pulses shaped by timing and pitch curves",
+      "tags": ["Sequencer"]
+    },
+    {
+      "slug": "Fractal",
+      "name": "X|FORMER Fractal",
+      "description": "A phrase looper that records gate and CV, then grows branches and ornaments from it",
+      "tags": ["Sequencer", "Recording"]
+    }
+  ]
+}

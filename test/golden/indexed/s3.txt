@@ -1,0 +1,21 @@
+engine indexed
+ticks 12000
+scale 6
+rootNote 5
+activeLength 4
+runMode 5
+firstStep 1
+octave 0
+transpose 5
+step 0 duration 144
+step 0 gateLength 88
+step 0 noteIndex 7
+step 1 duration 48
+step 1 gateLength 0
+step 1 noteIndex 2
+step 2 duration 192
+step 2 gateLength 200
+step 2 noteIndex 11
+step 3 duration 144
+step 3 gateLength 143
+step 3 noteIndex 2

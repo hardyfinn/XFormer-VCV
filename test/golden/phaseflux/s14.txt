@@ -1,0 +1,94 @@
+engine phaseflux
+ticks 6000
+scale 8
+rootNote 8
+divisor 24
+cycleLength 1
+cyclePhaseWarp -6
+resetMeasure 2
+octave 1
+transpose 4
+stage 0 skip 0
+stage 0 pulseCount 4
+stage 0 length 2
+stage 0 pitchWarp 32
+stage 0 temporalFlipV 1
+stage 0 tiltMelody 83
+stage 0 phaseShift 0
+stage 0 mask 1
+stage 0 accumulatorTrigger 1
+stage 0 gateLength 0
+stage 1 skip 0
+stage 1 pulseCount 6
+stage 1 length 4
+stage 1 basePitch -7
+stage 1 pitchCurve 1
+stage 1 gateLength 100
+stage 1 temporalWindow 0
+stage 2 skip 0
+stage 2 pulseCount 4
+stage 2 length 4
+stage 2 basePitch -4
+stage 2 pitchRange 3
+stage 2 pitchDirection 0
+stage 2 pitchCurve 2
+stage 2 pitchWarp 14
+stage 2 temporalWarp 48
+stage 2 temporalResponse -9
+stage 2 maskMelody 19
+stage 2 maskShift 6
+stage 2 pulseAccumStep 3
+stage 2 accumulatorTrigger 1
+stage 2 gateLength 100
+stage 3 skip 0
+stage 3 pulseCount 3
+stage 3 length 2
+stage 3 pitchDirection 1
+stage 3 pitchCurve 1
+stage 3 pitchFlipV 1
+stage 3 temporalWarp -45
+stage 3 temporalResponse 29
+stage 3 maskShift 4
+stage 3 pulseAccumStep -1
+stage 3 pitchWindow 1
+stage 7 skip 0
+stage 7 pulseCount 5
+stage 7 length 4
+stage 7 pitchResponse -56
+stage 7 temporalCurve 2
+stage 7 temporalFlipH 1
+stage 7 pulseAccumStep 0
+stage 12 skip 0
+stage 12 pulseCount 0
+stage 12 length 4
+stage 12 pitchResponse -16
+stage 12 temporalFlipV 1
+stage 12 temporalWarp -2
+stage 12 accumulatorStep -1
+stage 12 gateLength 50
+stage 12 temporalRepeat 0
+stage 14 skip 0
+stage 14 pulseCount 5
+stage 14 length 1
+stage 14 pitchRange 0
+stage 14 pitchWarp -16
+stage 14 temporalFlipV 1
+stage 14 temporalResponse -4
+stage 14 maskMelody 26
+stage 14 tiltMelody 49
+stage 14 phaseShift 4
+stage 14 accumulatorStep 4
+stage 14 pulseAccumTrigger 1
+stage 14 gateLength 1
+stage 14 pitchRepeat 3
+stage 15 skip 0
+stage 15 pulseCount 7
+stage 15 length 4
+stage 15 pitchDirection 0
+stage 15 pitchCurve 0
+stage 15 pitchResponse -20
+stage 15 temporalCurve 2
+stage 15 temporalFlipH 1
+stage 15 temporalWarp -53
+stage 15 maskMelody 66
+stage 15 accumulatorStep -3

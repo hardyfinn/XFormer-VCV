@@ -1,0 +1,35 @@
+engine stochastic
+ticks 12000
+renew
+rhythmMode 0
+melodyMode 1
+scale 1
+rootNote 11
+scaleRotate 0
+complexity 95
+contour -18
+range 67
+noteDuration 4
+variation 77
+rest 1
+gateLength 59
+legatoProb 29
+slide 24
+burst 2
+burstCount 91
+burstRate 66
+burstHold 0
+marblesSpread 91
+marblesBias 72
+maskRhythm 17
+tiltRhythm 98
+size 6
+degreeRotation 1
+maskRotation -3
+degreeTicket 5 57
+degreeTicket 6 94
+durationTicket 0 17
+durationTicket 3 46
+durationTicket 5 30
+octave -1
+transpose -2

@@ -1,0 +1,98 @@
+engine phaseflux
+ticks 12000
+scale 3
+rootNote 11
+divisor 12
+clockMult 107
+cycleLength 1
+pitchRate 8
+resetMeasure 1
+noteAccScope 1
+noteAccOrder 1
+noteAccPolarity 0
+noteAccReset 3
+noteAccPos 2
+noteAccNeg 10
+octave 1
+transpose -2
+stage 0 skip 0
+stage 0 pulseCount 7
+stage 0 length 4
+stage 0 pitchCurve 0
+stage 0 pitchResponse -13
+stage 0 temporalFlipH 1
+stage 0 maskShift 4
+stage 0 accumulatorStep 4
+stage 0 gateLength 90
+stage 0 pitchWindow 0
+stage 1 skip 0
+stage 1 pulseCount 7
+stage 1 length 1
+stage 1 basePitch 6
+stage 1 pitchRange 0
+stage 1 pitchDirection 0
+stage 1 pitchFlipV 1
+stage 1 pitchWarp 55
+stage 1 pitchResponse -49
+stage 1 temporalWarp -58
+stage 1 mask 2
+stage 1 accumulatorStep 2
+stage 1 pulseAccumTrigger 1
+stage 1 gateLength 50
+stage 2 skip 0
+stage 2 pulseCount 3
+stage 2 length 2
+stage 2 basePitch -10
+stage 2 pitchRange 0
+stage 2 pitchFlipV 1
+stage 2 pitchWarp -54
+stage 2 temporalResponse 19
+stage 2 mask 2
+stage 3 skip 0
+stage 3 pulseCount 7
+stage 3 length 11
+stage 3 basePitch 2
+stage 3 pitchRange 0
+stage 3 temporalCurve 2
+stage 3 temporalResponse 47
+stage 3 mask 7
+stage 3 accumulatorStep 3
+stage 3 pulseAccumStep 0
+stage 5 skip 0
+stage 5 pulseCount 2
+stage 5 length 6
+stage 5 pitchCurve 3
+stage 5 pitchWarp -34
+stage 5 temporalCurve 2
+stage 5 temporalWarp -47
+stage 5 phaseShift 0
+stage 5 pulseAccumTrigger 1
+stage 5 gateLength 0
+stage 8 skip 1
+stage 8 pulseCount 3
+stage 8 length 8
+stage 8 basePitch 9
+stage 8 pitchDirection 2
+stage 8 pitchResponse 43
+stage 8 temporalWarp 58
+stage 8 tiltMelody 27
+stage 8 temporalRepeat 0
+stage 11 skip 0
+stage 11 pulseCount 4
+stage 11 length 5
+stage 11 pitchCurve 3
+stage 11 pitchFlipV 1
+stage 11 accumulatorTrigger 1
+stage 13 skip 0
+stage 13 pulseCount 1
+stage 13 length 4
+stage 13 basePitch -2
+stage 13 pitchRange 3
+stage 13 pitchDirection 2
+stage 13 pitchCurve 0
+stage 13 pitchFlipH 1
+stage 13 pitchWarp -15
+stage 13 temporalFlipV 1
+stage 13 phaseShift 3
+stage 13 pulseAccumTrigger 1
+stage 13 gateLength 0
