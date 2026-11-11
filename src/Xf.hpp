@@ -76,7 +76,8 @@ struct Info {
 	std::string auxIn[2], auxInNote[2];   // empty = no jack
 	std::string auxOut, auxOutNote;
 	std::string action;                   // empty = no button
-	bool actionLatch = false;
+	std::string actionLabel;              // the short name over the button
+	bool multi = false;                   // the Multi module: every jack, labels drawn live
 };
 
 // common menus
@@ -252,9 +253,23 @@ struct XfModule : Module {
 		LIGHTS_LEN
 	};
 
-	std::unique_ptr<Adapter> ad;
-	Info info;
-	int numFields = 0;
+	// One engine per module, or all seven in Multi. Every adapter lives as long
+	// as the module, so the panel can still read one that was just swapped out.
+	std::vector<std::unique_ptr<Adapter>> adapters;
+	std::vector<Info> infos;
+	Adapter* ad = nullptr;          // the engine playing
+	const Info* info = nullptr;     // its labels
+	int cur = 0;
+	int engineParam = -1;           // Multi: the Engine setting's param id
+	int maxFields = 0;              // field params configured (the largest engine)
+	int numFields = 0;              // fields of the engine playing
+	// Multi: the settings of the engines not playing
+	struct Slot {
+		bool has = false;
+		std::vector<float> vals;
+		float dest[NUM_CTRLS], mode[NUM_CTRLS];
+	};
+	std::vector<Slot> slots;
 	std::vector<int> eff;       // values after the CTRL knobs, what the engine has
 	std::vector<int> owner;     // which CTRL (1-4) drives a field, 0 = none
 	std::vector<int> applied;   // last values sent to the engine
@@ -302,7 +317,16 @@ struct XfModule : Module {
 	int fieldDivider = 0;
 	bool wasRunning = true;
 
-	XfModule(Adapter* a, const Info& inf);
+	XfModule(Adapter* a, const Info& inf) : XfModule(std::vector<Adapter*>{a}, std::vector<Info>{inf}) {}
+	XfModule(const std::vector<Adapter*>& as, const std::vector<Info>& infs);
+	bool multi() const { return engineParam >= 0; }
+	const Field* fieldAt(int f) {
+		Adapter* a = ad;
+		return f >= 0 && f < (int)a->fields.size() ? &a->fields[f] : nullptr;
+	}
+	void storeSlot(int n);
+	void loadSlot(int n);
+	void switchEngine(int n, bool save);
 
 	int paramOf(int f) const { return FIELD_PARAM + f; }
 	int fieldValue(int f) { return (int)std::round(params[FIELD_PARAM + f].getValue()); }
@@ -312,9 +336,13 @@ struct XfModule : Module {
 	void computeFields(bool force);
 	int effOf(int f) { return f >= 0 && f < numFields ? eff[f] : 0; }
 
-	// menus
-	int pageCount() { return (int)ad->pages.size() + NUM_CTRLS; }
-	bool isCtrlPage(int p) { return p >= (int)ad->pages.size(); }
+	// menus: [ENGINE (Multi)] the engine's pages, then one page per CTRL knob
+	int pageBase() { return multi() ? 1 : 0; }
+	int ctrlPage(int k) { return pageBase() + (int)ad->pages.size() + k; }
+	int pageCount() { return ctrlPage(NUM_CTRLS); }
+	bool isCtrlPage(int p) { return p >= ctrlPage(0); }
+	int ctrlOfPage(int p) { return p - ctrlPage(0); }
+	std::vector<std::string> rowChoices(int pid);   // names for a menu, empty = a number
 	std::vector<int> pageParams(int p);
 	std::string pageTitle(int p);
 	int selectedParam() {
@@ -361,6 +389,8 @@ struct XfWidget : ModuleWidget {
 	struct NAME##Module : xfm::XfModule {                                  \
 		NAME##Module() : xfm::XfModule(new ADAPTER, INFO()) {}             \
 	};                                                                      \
+	xfm::Adapter* xfmMake##NAME() { return new ADAPTER; }                  \
+	xfm::Info xfmInfo##NAME() { return INFO(); }                           \
 	struct NAME##Widget : xfm::XfWidget {                                  \
 		NAME##Widget(NAME##Module* m) : xfm::XfWidget(m, INFO()) {}        \
 	};                                                                      \

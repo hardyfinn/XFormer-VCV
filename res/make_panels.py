@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Draws the seven panels res/<Module>.svg. VCV Rack can't draw SVG <text>, so
+# Draws the eight panels res/<Module>.svg. VCV Rack can't draw SVG <text>, so
 # every label is turned into outline paths with fontTools. Positions are in mm
 # and must match src/Layout.hpp.
 #   pip install fonttools
@@ -49,6 +49,8 @@ MODULES = [
          aux_in=[None, None], aux_out=("STAGE", "trig"), action=None),
     dict(slug="Fractal", title="FRACTAL", blurb="a phrase looper that grows",
          aux_in=[("REC G", "gate"), ("REC CV", "1 V/oct")], aux_out=("ORN", "trig"), action="REC"),
+    # all seven engines: the module draws the engine name, aux and action labels
+    dict(slug="Multi", title="MULTI", blurb=None, aux_in=[None, None], aux_out=None, action=None),
 ]
 
 fonts = {}
@@ -91,7 +93,8 @@ def panel(mod):
     # title strip
     add(text("X|FORMER", 6.0, 9.0, 2.6, FONT_BOLD, SOFT, anchor="start", spacing=0.12))
     add(text(mod["title"], 25.0, 9.0, 4.2, FONT_BOLD, AMBER, anchor="start", spacing=0.14))
-    add(text(mod["blurb"], 25.0 + 3.6 * len(mod["title"]) + 3.0, 8.8, 2.4, FONT_MED, SOFT, anchor="start"))
+    if mod["blurb"]:
+        add(text(mod["blurb"], 25.0 + 3.6 * len(mod["title"]) + 3.0, 8.8, 2.4, FONT_MED, SOFT, anchor="start"))
     add(text("Haer", W - 6.0, 8.8, 2.6, FONT_BOLD, INK, anchor="end", spacing=0.08))
 
     # display and grid windows
@@ -131,10 +134,12 @@ def panel(mod):
             add(text(a[0], IN_X[4 + j], JACK_LABEL_Y, 2.9, FONT_BOLD, AMBER))
             add(text(a[1], IN_X[4 + j], FOOT_Y, 2.1, FONT_MED, SOFT))
     add(f'<rect x="{OUT_X[0] - 6.0}" y="111.2" width="{OUT_X[5] - OUT_X[0] + 12.0}" height="16.4" rx="1.2" fill="{OUTBOX}"/>')
-    outs = ["GATE", "PITCH", "VEL", "TRIG", "EOC", mod["aux_out"][0]]
+    outs = ["GATE", "PITCH", "VEL", "TRIG", "EOC", mod["aux_out"][0] if mod["aux_out"] else None]
     for x, lab in zip(OUT_X, outs):
-        add(text(lab, x, JACK_LABEL_Y, 2.9, FONT_BOLD, OUT_TEXT))
-    add(text(mod["aux_out"][1], OUT_X[5], FOOT_Y, 2.1, FONT_MED, "#9AA3AD"))
+        if lab:
+            add(text(lab, x, JACK_LABEL_Y, 2.9, FONT_BOLD, OUT_TEXT))
+    if mod["aux_out"]:
+        add(text(mod["aux_out"][1], OUT_X[5], FOOT_Y, 2.1, FONT_MED, "#9AA3AD"))
     add(text("OUT", (OUT_X[1] + OUT_X[2]) / 2 + 5.5, FOOT_Y, 2.1, FONT_MED, "#9AA3AD", spacing=0.1))
 
     svg = (

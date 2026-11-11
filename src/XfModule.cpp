@@ -31,61 +31,153 @@ int divisorIndexOf(int ticks) {
 
 // ---------------------------------------------------------------- setup
 
+static XfModule* xfOf(Module* m) { return dynamic_cast<XfModule*>(m); }
+
 // what a CTRL knob shows: its destination and the value it gives
 struct CtrlQuantity : ParamQuantity {
 	int k = 0;
 	std::string getLabel() override {
-		XfModule* m = dynamic_cast<XfModule*>(module);
+		XfModule* m = xfOf(module);
 		if (!m)
 			return ParamQuantity::getLabel();
-		int d = m->ctrlDest(k);
-		return string::f("CTRL %d: %s", k + 1, d < 0 ? "no destination" : m->ad->fields[d].label.c_str());
+		const Field* fd = m->fieldAt(m->ctrlDest(k));
+		return string::f("CTRL %d: %s", k + 1, fd ? fd->label.c_str() : "no destination");
 	}
 	std::string getDisplayValueString() override {
-		XfModule* m = dynamic_cast<XfModule*>(module);
+		XfModule* m = xfOf(module);
 		if (!m)
 			return ParamQuantity::getDisplayValueString();
 		int d = m->ctrlDest(k);
-		if (d < 0)
+		const Field* fd = m->fieldAt(d);
+		if (!fd)
 			return string::f("%d%%", (int)std::round(m->ctrlAmount(k) * 100.f));
-		return m->ad->fields[d].text(m->eff[d]);
+		return fd->text(m->eff[d]);
 	}
 };
 
-XfModule::XfModule(Adapter* a, const Info& inf) : ad(a), info(inf) {
+// A setting. Its range, name and value names come from the engine playing, so
+// the Multi module can reuse the same params for every engine.
+struct FieldQuantity : ParamQuantity {
+	int f = 0;
+	const Field* fd() {
+		XfModule* m = xfOf(module);
+		return m ? m->fieldAt(f) : nullptr;
+	}
+	float getMinValue() override { const Field* d = fd(); return d ? (float)d->min : 0.f; }
+	float getMaxValue() override { const Field* d = fd(); return d ? (float)d->max : 0.f; }
+	float getDefaultValue() override { const Field* d = fd(); return d ? (float)d->def : 0.f; }
+	std::string getLabel() override { const Field* d = fd(); return d ? d->label : "(not used by this engine)"; }
+	std::string getUnit() override { return ""; }
+	std::string getDisplayValueString() override {
+		const Field* d = fd();
+		if (!d)
+			return "";
+		return d->text(clamp((int)std::round(getValue()), d->min, d->max));
+	}
+	void setDisplayValueString(std::string s) override {
+		const Field* d = fd();
+		if (!d)
+			return;
+		for (size_t i = 0; i < d->names.size(); i++)
+			if (string::lowercase(d->names[i]) == string::lowercase(s)) {
+				setValue((float)(d->min + (int)i));
+				return;
+			}
+		if (d->names.empty())
+			setValue((float)(std::atoi(s.c_str()) - d->shown));
+	}
+};
+
+// a CTRL knob's destination: None or one of the engine's settings
+struct CtrlDestQuantity : ParamQuantity {
+	int k = 0;
+	float getMaxValue() override { XfModule* m = xfOf(module); return m ? (float)m->ad->fields.size() : 0.f; }
+	float getDefaultValue() override {
+		XfModule* m = xfOf(module);
+		if (!m || m->ad->ctrlKeys[k].empty())
+			return 0.f;
+		return (float)(m->ad->fieldIndex(m->ad->ctrlKeys[k]) + 1);
+	}
+	std::string getDisplayValueString() override {
+		XfModule* m = xfOf(module);
+		const Field* fd = m ? m->fieldAt(m->ctrlDest(k)) : nullptr;
+		return fd ? fd->label : "None";
+	}
+};
+
+struct ActionQuantity : ParamQuantity {
+	std::string getLabel() override {
+		XfModule* m = xfOf(module);
+		if (!m)
+			return "Action";
+		return m->info->action.empty() ? "(not used by this engine)" : m->info->action;
+	}
+	std::string getDisplayValueString() override { return getValue() > 0.5f ? "Pressed" : "Released"; }
+	std::string getUnit() override { return ""; }
+};
+
+struct AuxPortInfo : PortInfo {
+	bool out = false;
+	int j = 0;
+	std::string getName() override {
+		XfModule* m = xfOf(module);
+		if (!m)
+			return name;
+		const Info& in = *m->info;
+		std::string n = out ? in.auxOut : in.auxIn[j];
+		std::string note = out ? in.auxOutNote : in.auxInNote[j];
+		if (n.empty())
+			return "(not used by this engine)";
+		return n + (note.empty() ? "" : " (" + note + ")");
+	}
+};
+
+XfModule::XfModule(const std::vector<Adapter*>& as, const std::vector<Info>& infs) {
+	for (Adapter* a : as)
+		adapters.emplace_back(a);
+	infos = infs;
+	slots.resize(adapters.size());
+	ad = adapters[0].get();
+	info = &infos[0];
+	for (auto& a : adapters)
+		maxFields = std::max(maxFields, (int)a->fields.size());
 	numFields = (int)ad->fields.size();
-	config(FIELD_PARAM + numFields, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
+	bool isMulti = adapters.size() > 1;
+	config(FIELD_PARAM + maxFields + (isMulti ? 1 : 0), INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
 	configSwitch(RUN_PARAM, 0.f, 1.f, 1.f, "Run", {"Stopped", "Running"});
 	configButton(RESET_PARAM, "Reset (back to the start, on the next clock)");
-	if (info.action.empty())
-		configButton(ACTION_PARAM, "(unused)");
-	else if (info.actionLatch)
-		configSwitch(ACTION_PARAM, 0.f, 1.f, 0.f, info.action, {"Off", "On"});
-	else
-		configButton(ACTION_PARAM, info.action);
+	configParam<ActionQuantity>(ACTION_PARAM, 0.f, 1.f, 0.f, "Action");
 	configButton(PAGE_PREV_PARAM, "Previous page");
 	configButton(PAGE_NEXT_PARAM, "Next page");
 
-	std::vector<std::string> destNames = {"None"};
-	for (const Field& f : ad->fields)
-		destNames.push_back(f.label);
 	for (int k = 0; k < NUM_CTRLS; k++) {
 		auto* q = configParam<CtrlQuantity>(CTRL_PARAM + k, 0.f, 1.f, 0.5f, string::f("CTRL %d", k + 1));
 		q->k = k;
 		configButton(CTRL_MENU_PARAM + k, string::f("CTRL %d menu (destination and mode)", k + 1));
 		configParam(CTRL_ATT_PARAM + k, -1.f, 1.f, 1.f, string::f("CTRL %d CV amount (noon = off, left = inverted)", k + 1), "%", 0.f, 100.f);
-		int def = ad->ctrlKeys[k].empty() ? -1 : ad->fieldIndex(ad->ctrlKeys[k]);
-		configSwitch(CTRL_DEST_PARAM + k, 0.f, (float)numFields, (float)(def + 1), string::f("CTRL %d destination", k + 1), destNames);
+		auto* dq = configParam<CtrlDestQuantity>(CTRL_DEST_PARAM + k, 0.f, (float)maxFields, 0.f, string::f("CTRL %d destination", k + 1));
+		dq->k = k;
+		dq->snapEnabled = true;
+		dq->randomizeEnabled = false;
+		params[CTRL_DEST_PARAM + k].setValue(dq->getDefaultValue());
 		configSwitch(CTRL_MODE_PARAM + k, 0.f, 1.f, 0.f, string::f("CTRL %d mode", k + 1),
 			{"Offset (noon = the menu value)", "Direct (the knob sets the value)"});
 		configInput(CTRL_CV_INPUT + k, string::f("CTRL %d CV (+-5 V sweeps the whole knob, scaled by CV amount)", k + 1));
 	}
-	for (int f = 0; f < numFields; f++) {
-		const Field& fd = ad->fields[f];
-		if (!fd.names.empty())
-			configSwitch(FIELD_PARAM + f, fd.min, fd.max, fd.def, fd.label, fd.names);
-		else
-			configParam(FIELD_PARAM + f, fd.min, fd.max, fd.def, fd.label, fd.unit, 0.f, 1.f, fd.shown)->snapEnabled = true;
+	for (int f = 0; f < maxFields; f++) {
+		auto* q = configParam<FieldQuantity>(FIELD_PARAM + f, 0.f, 1.f, 0.f, "");
+		q->f = f;
+		q->snapEnabled = true;
+		params[FIELD_PARAM + f].setValue(q->getDefaultValue());
+	}
+	if (isMulti) {
+		engineParam = FIELD_PARAM + maxFields;
+		std::vector<std::string> names;
+		for (const Info& in : infos)
+			names.push_back(in.title);
+		SwitchQuantity* q = configSwitch(engineParam, 0.f, (float)(names.size() - 1), 0.f, "Engine", names);
+		q->resetEnabled = false;      // Initialize keeps the engine
+		q->randomizeEnabled = false;
 	}
 
 	configInput(CLOCK_INPUT, "Clock (pulses per quarter note set on the Clock page)");
@@ -93,29 +185,92 @@ XfModule::XfModule(Adapter* a, const Info& inf) : ad(a), info(inf) {
 	configInput(RUN_INPUT, "Run toggle (trigger)");
 	configInput(TRANSPOSE_INPUT, "Transpose (1 V/oct, added to the pitch output)");
 	for (int i = 0; i < 2; i++)
-		configInput(AUX_INPUT + i, info.auxIn[i].empty() ? "(unused)" : info.auxIn[i] + (info.auxInNote[i].empty() ? "" : " (" + info.auxInNote[i] + ")"));
+		configInput<AuxPortInfo>(AUX_INPUT + i, "Aux")->j = i;
 	configOutput(GATE_OUTPUT, "Gate");
 	configOutput(PITCH_OUTPUT, "Pitch (1 V/oct)");
 	configOutput(VEL_OUTPUT, "Velocity (0-10 V)");
 	configOutput(TRIG_OUTPUT, "Trigger (each new note)");
 	configOutput(EOC_OUTPUT, "End of cycle");
-	configOutput(AUX_OUTPUT, info.auxOut.empty() ? "(unused)" : info.auxOut + (info.auxOutNote.empty() ? "" : " (" + info.auxOutNote + ")"));
+	configOutput<AuxPortInfo>(AUX_OUTPUT, "Aux")->out = true;
 
-	eff.assign(numFields, 0);
-	owner.assign(numFields, 0);
-	applied.assign(numFields, INT32_MIN);
-	fPpqn = ad->fieldIndex("_ppqn");
-	fResetBars = ad->fieldIndex("_resetBars");
-	fSlide = ad->fieldIndex("_slide");
-	fVel = ad->fieldIndex("_vel");
-	ad->notify = [this](const std::string& key, int v) {
-		int f = ad->fieldIndex(key);
-		if (f >= 0) {
-			params[FIELD_PARAM + f].setValue((float)v);
-			applied[f] = v;
-		}
-	};
-	ad->initFresh();
+	eff.assign(maxFields, 0);
+	owner.assign(maxFields, 0);
+	applied.assign(maxFields, INT32_MIN);
+	for (auto& up : adapters) {
+		Adapter* a = up.get();
+		a->notify = [this, a](const std::string& key, int v) {
+			if (a != ad)
+				return;
+			int f = a->fieldIndex(key);
+			if (f >= 0) {
+				params[FIELD_PARAM + f].setValue((float)v);
+				applied[f] = v;
+			}
+		};
+		a->initFresh();
+	}
+	switchEngine(0, false);
+}
+
+// Multi: keep the settings of the engine being left, bring back the next one's
+void XfModule::storeSlot(int n) {
+	Slot& s = slots[n];
+	int nf = (int)adapters[n]->fields.size();
+	s.vals.resize(nf);
+	for (int f = 0; f < nf; f++)
+		s.vals[f] = params[FIELD_PARAM + f].getValue();
+	for (int k = 0; k < NUM_CTRLS; k++) {
+		s.dest[k] = params[CTRL_DEST_PARAM + k].getValue();
+		s.mode[k] = params[CTRL_MODE_PARAM + k].getValue();
+	}
+	s.has = true;
+}
+
+void XfModule::loadSlot(int n) {
+	Slot& s = slots[n];
+	Adapter* a = adapters[n].get();
+	int nf = (int)a->fields.size();
+	for (int f = 0; f < maxFields; f++) {
+		float v = 0.f;
+		if (f < nf)
+			v = (s.has && f < (int)s.vals.size()) ? s.vals[f] : (float)a->fields[f].def;
+		params[FIELD_PARAM + f].setValue(v);
+	}
+	for (int k = 0; k < NUM_CTRLS; k++) {
+		float def = a->ctrlKeys[k].empty() ? 0.f : (float)(a->fieldIndex(a->ctrlKeys[k]) + 1);
+		params[CTRL_DEST_PARAM + k].setValue(s.has ? s.dest[k] : def);
+		params[CTRL_MODE_PARAM + k].setValue(s.has ? s.mode[k] : 0.f);
+	}
+}
+
+void XfModule::switchEngine(int n, bool save) {
+	n = clamp(n, 0, (int)adapters.size() - 1);
+	if (save && n != cur) {
+		storeSlot(cur);
+		ad->stop();
+	}
+	// the menus and grid first, so the panel never pairs a page with the wrong engine
+	page = 0;
+	selected = 0;
+	scroll = 0;
+	gridLane = 0;
+	gridPage = 0;
+	Adapter* a = adapters[n].get();
+	ad = a;
+	info = &infos[n];
+	cur = n;
+	numFields = (int)a->fields.size();
+	if (save || multi())
+		loadSlot(n);
+	if (engineParam >= 0)
+		params[engineParam].setValue((float)n);
+	fPpqn = a->fieldIndex("_ppqn");
+	fResetBars = a->fieldIndex("_resetBars");
+	fSlide = a->fieldIndex("_slide");
+	fVel = a->fieldIndex("_vel");
+	std::fill(applied.begin(), applied.end(), INT32_MIN);
+	lastCycle = -1;
+	needApply = true;
 }
 
 float XfModule::ctrlAmount(int k) {
@@ -167,26 +322,38 @@ std::vector<int> XfModule::pageParams(int p) {
 	std::vector<int> rows;
 	if (p < 0 || p >= pageCount())
 		return rows;
+	if (multi() && p == 0) {
+		rows.push_back(engineParam);
+		return rows;
+	}
 	if (isCtrlPage(p)) {
-		int k = p - (int)ad->pages.size();
+		int k = ctrlOfPage(p);
 		rows.push_back(CTRL_DEST_PARAM + k);
 		rows.push_back(CTRL_MODE_PARAM + k);
 		return rows;
 	}
-	for (int f : ad->pages[p].fields)
+	for (int f : ad->pages[p - pageBase()].fields)
 		rows.push_back(FIELD_PARAM + f);
 	return rows;
 }
 
 std::string XfModule::pageTitle(int p) {
+	if (multi() && p == 0)
+		return "ENGINE";
 	if (isCtrlPage(p))
-		return string::f("CTRL %d", p - (int)ad->pages.size() + 1);
-	return ad->pages[p].title;
+		return string::f("CTRL %d", ctrlOfPage(p) + 1);
+	if (p < 0 || p >= pageCount())
+		return "";
+	return ad->pages[p - pageBase()].title;
 }
 
 std::string XfModule::rowLabel(int pid) {
-	if (pid >= FIELD_PARAM)
-		return ad->fields[pid - FIELD_PARAM].label;
+	if (pid == engineParam)
+		return "Engine";
+	if (pid >= FIELD_PARAM) {
+		const Field* fd = fieldAt(pid - FIELD_PARAM);
+		return fd ? fd->label : "";
+	}
 	if (pid >= CTRL_MODE_PARAM)
 		return "Mode";
 	if (pid >= CTRL_DEST_PARAM)
@@ -195,21 +362,48 @@ std::string XfModule::rowLabel(int pid) {
 }
 
 std::string XfModule::rowValue(int pid, bool effective) {
+	if (pid == engineParam)
+		return info->title;
 	if (pid >= FIELD_PARAM) {
 		int f = pid - FIELD_PARAM;
-		return ad->fields[f].text(effective ? eff[f] : clamp(fieldValue(f), ad->fields[f].min, ad->fields[f].max));
+		const Field* fd = fieldAt(f);
+		if (!fd)
+			return "";
+		return fd->text(effective ? eff[f] : clamp(fieldValue(f), fd->min, fd->max));
 	}
 	if (pid >= CTRL_MODE_PARAM)
 		return ctrlDirect(pid - CTRL_MODE_PARAM) ? "Direct" : "Offset";
 	if (pid >= CTRL_DEST_PARAM) {
-		int d = ctrlDest(pid - CTRL_DEST_PARAM);
-		return d < 0 ? "None" : ad->fields[d].label;
+		const Field* fd = fieldAt(ctrlDest(pid - CTRL_DEST_PARAM));
+		return fd ? fd->label : "None";
 	}
 	return "";
 }
 
+std::vector<std::string> XfModule::rowChoices(int pid) {
+	if (pid == engineParam) {
+		std::vector<std::string> v;
+		for (const Info& in : infos)
+			v.push_back(in.title);
+		return v;
+	}
+	if (pid >= FIELD_PARAM) {
+		const Field* fd = fieldAt(pid - FIELD_PARAM);
+		return fd ? fd->names : std::vector<std::string>();
+	}
+	if (pid >= CTRL_MODE_PARAM)
+		return {"Offset", "Direct"};
+	if (pid >= CTRL_DEST_PARAM) {
+		std::vector<std::string> v = {"None"};
+		for (const Field& f : ad->fields)
+			v.push_back(f.label);
+		return v;
+	}
+	return {};
+}
+
 int XfModule::rowOwner(int pid) {
-	if (pid >= FIELD_PARAM)
+	if (pid != engineParam && pid >= FIELD_PARAM && pid - FIELD_PARAM < (int)owner.size())
 		return owner[pid - FIELD_PARAM];
 	return 0;
 }
@@ -268,6 +462,13 @@ void XfModule::runTick() {
 void XfModule::process(const ProcessArgs& args) {
 	const float dt = args.sampleTime;
 
+	// Multi: the Engine setting changed
+	if (engineParam >= 0) {
+		int want = clamp((int)std::round(params[engineParam].getValue()), 0, (int)adapters.size() - 1);
+		if (want != cur)
+			switchEngine(want, true);
+	}
+
 	// settings: the menu values plus the CTRL knobs
 	if (needApply) {
 		computeFields(true);
@@ -279,7 +480,7 @@ void XfModule::process(const ProcessArgs& args) {
 		computeFields(false);
 	}
 	for (int i = 0; i < 2; i++)
-		if (!info.auxIn[i].empty())
+		if (!info->auxIn[i].empty())
 			ad->auxIn(i, inputs[AUX_INPUT + i].getVoltage(), inputs[AUX_INPUT + i].isConnected());
 
 	// edits from the panel
@@ -304,7 +505,7 @@ void XfModule::process(const ProcessArgs& args) {
 		goToPage(page + 1);
 	for (int k = 0; k < NUM_CTRLS; k++)
 		if (ctrlMenu[k].process(params[CTRL_MENU_PARAM + k].getValue() > 0.f)) {
-			int p = (int)ad->pages.size() + k;
+			int p = ctrlPage(k);
 			if (page == p)
 				nextRow();
 			else
@@ -323,7 +524,7 @@ void XfModule::process(const ProcessArgs& args) {
 		rst = true;
 	if (rst)
 		doReset();
-	if (!info.action.empty())
+	if (!info->action.empty())
 		ad->action(params[ACTION_PARAM].getValue() > 0.5f);
 
 	// external clock: each pulse is 192 / PPQN engine ticks, spread evenly over
@@ -430,18 +631,17 @@ void XfModule::process(const ProcessArgs& args) {
 	lights[CLOCK_LIGHT].setBrightness(clockLight);
 	lights[ACTION_LIGHT].setBrightness(ad->actionLit() ? 1.f : 0.f);
 	for (int k = 0; k < NUM_CTRLS; k++)
-		lights[CTRL_MENU_LIGHT + k].setBrightness(page == (int)ad->pages.size() + k ? 1.f : 0.f);
+		lights[CTRL_MENU_LIGHT + k].setBrightness(page == ctrlPage(k) ? 1.f : 0.f);
 }
 
 void XfModule::onReset(const ResetEvent& e) {
-	Module::onReset(e);
-	ad->initFresh();
-	page = 0;
-	selected = 0;
-	scroll = 0;
-	gridLane = 0;
-	gridPage = 0;
-	needApply = true;
+	Module::onReset(e);   // the field params go to the playing engine's defaults
+	for (auto& a : adapters)
+		a->initFresh();
+	for (auto& sl : slots)
+		sl.has = false;
+	switchEngine(cur, false);
+	loadSlot(cur);
 }
 
 json_t* XfModule::dataToJson() {
@@ -449,12 +649,76 @@ json_t* XfModule::dataToJson() {
 	json_object_set_new(root, "page", json_integer(page));
 	json_object_set_new(root, "gridLane", json_integer(gridLane));
 	json_object_set_new(root, "gridPage", json_integer(gridPage));
-	json_object_set_new(root, "engine", ad->toJson());
+	if (!multi()) {
+		json_object_set_new(root, "engine", ad->toJson());
+		return root;
+	}
+	// Multi: every engine's settings and pattern. The playing engine's settings
+	// are saved here too, since Rack clamps params to the default engine's
+	// ranges when it loads them.
+	int c = cur;
+	json_object_set_new(root, "current", json_integer(c));
+	json_t* arr = json_array();
+	for (size_t n = 0; n < adapters.size(); n++) {
+		json_t* o = json_object();
+		json_object_set_new(o, "slug", json_string(infos[n].slug.c_str()));
+		// the playing engine's settings are in the params, the others' in their slots
+		bool live = (int)n == c;
+		if (live || slots[n].has) {
+			json_t* v = json_array();
+			int nf = (int)adapters[n]->fields.size();
+			for (int f = 0; f < nf; f++)
+				json_array_append_new(v, json_real(live ? params[FIELD_PARAM + f].getValue() : slots[n].vals[f]));
+			json_object_set_new(o, "fields", v);
+			json_t* d = json_array();
+			json_t* md = json_array();
+			for (int k = 0; k < NUM_CTRLS; k++) {
+				json_array_append_new(d, json_real(live ? params[CTRL_DEST_PARAM + k].getValue() : slots[n].dest[k]));
+				json_array_append_new(md, json_real(live ? params[CTRL_MODE_PARAM + k].getValue() : slots[n].mode[k]));
+			}
+			json_object_set_new(o, "ctrlDest", d);
+			json_object_set_new(o, "ctrlMode", md);
+		}
+		json_object_set_new(o, "engine", adapters[n]->toJson());
+		json_array_append_new(arr, o);
+	}
+	json_object_set_new(root, "engines", arr);
 	return root;
 }
 
 void XfModule::dataFromJson(json_t* root) {
 	json_t* j;
+	if (multi() && (j = json_object_get(root, "engines"))) {
+		for (size_t i = 0; i < json_array_size(j); i++) {
+			json_t* o = json_array_get(j, i);
+			json_t* sl = json_object_get(o, "slug");
+			int n = -1;
+			for (size_t q = 0; q < infos.size(); q++)
+				if (sl && infos[q].slug == json_string_value(sl))
+					n = (int)q;
+			if (n < 0)
+				continue;
+			Slot& s = slots[n];
+			json_t* v = json_object_get(o, "fields");
+			s.has = v != nullptr;
+			if (v) {
+				const Adapter* a = adapters[n].get();
+				s.vals.resize(a->fields.size());
+				for (size_t f = 0; f < a->fields.size(); f++)
+					s.vals[f] = f < json_array_size(v) ? (float)json_number_value(json_array_get(v, f)) : (float)a->fields[f].def;
+				json_t* d = json_object_get(o, "ctrlDest");
+				json_t* md = json_object_get(o, "ctrlMode");
+				for (int k = 0; k < NUM_CTRLS; k++) {
+					s.dest[k] = d ? (float)json_number_value(json_array_get(d, k)) : 0.f;
+					s.mode[k] = md ? (float)json_number_value(json_array_get(md, k)) : 0.f;
+				}
+			}
+			if (json_t* e = json_object_get(o, "engine"))
+				adapters[n]->fromJson(e);
+		}
+		int c = (j = json_object_get(root, "current")) ? (int)json_integer_value(j) : 0;
+		switchEngine(c, false);   // also loads its saved settings into the params
+	}
 	if ((j = json_object_get(root, "page")))
 		page = clamp((int)json_integer_value(j), 0, pageCount() - 1);
 	if ((j = json_object_get(root, "gridLane")))
@@ -463,7 +727,7 @@ void XfModule::dataFromJson(json_t* root) {
 		gridPage = std::max(0, (int)json_integer_value(j));
 	selected = 0;
 	scroll = 0;
-	if ((j = json_object_get(root, "engine")))
+	if (!multi() && (j = json_object_get(root, "engine")))
 		ad->fromJson(j);
 	needApply = true;
 }

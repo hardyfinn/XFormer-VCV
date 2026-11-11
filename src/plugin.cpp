@@ -11,4 +11,5 @@ void init(Plugin* p) {
 	p->addModel(modelDiscrete);
 	p->addModel(modelPhaseFlux);
 	p->addModel(modelFractal);
+	p->addModel(modelMulti);
 }

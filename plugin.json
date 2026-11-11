@@ -1,7 +1,7 @@
 {
   "slug": "XFormer",
   "name": "X|FORMER",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "license": "GPL-3.0-or-later",
   "brand": "Haer",
   "author": "Haer",
@@ -54,6 +54,12 @@
       "name": "X|FORMER Fractal",
       "description": "A phrase looper that records gate and CV, then grows branches and ornaments from it",
       "tags": ["Sequencer", "Recording"]
+    },
+    {
+      "slug": "Multi",
+      "name": "X|FORMER Multi",
+      "description": "All seven X|FORMER engines behind one panel: pick the engine on the display's ENGINE page",
+      "tags": ["Sequencer", "Random"]
     }
   ]
 }

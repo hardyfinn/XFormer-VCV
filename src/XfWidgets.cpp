@@ -29,15 +29,16 @@ static std::string noteName(float volts) {
 
 static void appendParamItem(ui::Menu* menu, XfModule* m, int pid) {
 	ParamQuantity* q = m->paramQuantities[pid];
-	if (q->snapEnabled || dynamic_cast<SwitchQuantity*>(q)) {
-		SwitchQuantity* sq = dynamic_cast<SwitchQuantity*>(q);
-		if (sq) {
-			int mn = (int)q->getMinValue();
-			menu->addChild(createIndexSubmenuItem(m->rowLabel(pid), sq->labels,
-				[=]() { return (size_t)((int)std::round(q->getValue()) - mn); },
-				[=](size_t i) { q->setValue((float)((int)i + mn)); }));
-			return;
-		}
+	std::vector<std::string> choices = m->rowChoices(pid);
+	if (choices.empty())
+		if (SwitchQuantity* sq = dynamic_cast<SwitchQuantity*>(q))
+			choices = sq->labels;
+	if (!choices.empty()) {
+		int mn = (int)q->getMinValue();
+		menu->addChild(createIndexSubmenuItem(m->rowLabel(pid), choices,
+			[=]() { return (size_t)((int)std::round(q->getValue()) - mn); },
+			[=](size_t i) { q->setValue((float)((int)i + mn)); }));
+		return;
 	}
 	auto* s = new ui::Slider;
 	s->quantity = q;
@@ -169,7 +170,7 @@ struct EditWidget : OpaqueWidget {
 			return;
 		XfModule* m = module;
 		ui::Menu* menu = rack::createMenu();
-		menu->addChild(createMenuLabel(m->info.title + " settings"));
+		menu->addChild(createMenuLabel(m->info->title + " settings"));
 		std::vector<std::string> pages;
 		for (int p = 0; p < m->pageCount(); p++)
 			pages.push_back(m->pageTitle(p));
@@ -296,13 +297,14 @@ struct Display : EditWidget {
 			nvgFill(vg);
 		}
 		if (m->isCtrlPage(m->page)) {
-			int k = m->page - (int)m->ad->pages.size();
+			int k = m->ctrlOfPage(m->page);
 			int d = m->ctrlDest(k);
-			std::string help = d < 0 ? "Pick a setting for this knob with DATA." :
+			const Field* fd = m->fieldAt(d);
+			std::string help = !fd ? "Pick a setting for this knob with DATA." :
 				(m->ctrlDirect(k) ? "Direct: the knob sweeps the whole range." : "Offset: noon leaves the menu value as set.");
 			text(vg, pad, HEAD + 3 * ROW_H, help, AMBER_DIM, 8.f);
-			if (d >= 0)
-				text(vg, pad, HEAD + 4 * ROW_H, "Now: " + m->ad->fields[d].text(m->eff[d]), CYAN, 9.f);
+			if (fd)
+				text(vg, pad, HEAD + 4 * ROW_H, "Now: " + fd->text(m->eff[d]), CYAN, 9.f);
 		}
 
 		// footer: engine status, note playing
@@ -391,7 +393,7 @@ struct Grid : OpaqueWidget {
 
 	Grid() { fontPath = asset::system("res/fonts/ShareTechMono-Regular.ttf"); }
 
-	Adapter* ad() { return module ? module->ad.get() : nullptr; }
+	Adapter* ad() { return module ? module->ad : nullptr; }
 	int laneIdx() { return module ? clamp(module->gridLane, 0, std::max(0, (int)ad()->lanes.size() - 1)) : 0; }
 	int count() { return ad() ? std::max(1, ad()->count(laneIdx())) : 32; }
 	int cols() { return std::min(COLS, count()); }
@@ -715,10 +717,78 @@ struct CtrlKnob : RoundBlackKnob {
 	}
 };
 
+// Multi: the names of the aux jacks, the action button and the engine, drawn
+// from the engine playing (the panel leaves these spaces blank)
+struct LiveLabels : TransparentWidget {
+	XfModule* module = nullptr;
+	Info fallback;
+	std::string boldPath, plainPath;
+	LiveLabels() {
+		boldPath = asset::system("res/fonts/Nunito-Bold.ttf");
+		plainPath = asset::system("res/fonts/DejaVuSans.ttf");
+	}
+	// size in mm, (x, y) the baseline point in mm; shrinks to fit maxW when given
+	void label(NVGcontext* vg, int face, const std::string& s, float x, float y, float size, NVGcolor c,
+		int align = NVG_ALIGN_CENTER, float maxW = 0.f) {
+		if (s.empty())
+			return;
+		nvgFontFaceId(vg, face);
+		nvgFontSize(vg, mm2px(size));
+		nvgTextLetterSpacing(vg, mm2px(size) * 0.05f);
+		if (maxW > 0.f) {
+			float w = nvgTextBounds(vg, 0, 0, s.c_str(), NULL, NULL);
+			if (w > mm2px(maxW)) {
+				nvgFontSize(vg, mm2px(size) * mm2px(maxW) / w);
+			}
+		}
+		nvgFillColor(vg, c);
+		nvgTextAlign(vg, align | NVG_ALIGN_BASELINE);
+		nvgText(vg, mm2px(x), mm2px(y), s.c_str(), NULL);
+	}
+	void draw(const DrawArgs& args) override {
+		using namespace layout;
+		std::shared_ptr<window::Font> bold = APP->window->loadFont(boldPath);
+		std::shared_ptr<window::Font> plain = APP->window->loadFont(plainPath);
+		if (!bold || bold->handle < 0 || !plain || plain->handle < 0)
+			return;
+		const Info& in = module ? *module->info : fallback;
+		NVGcontext* vg = args.vg;
+		const NVGcolor amber = nvgRGB(0xC2, 0x73, 0x0F), ink = nvgRGB(0x1E, 0x21, 0x26), soft = nvgRGB(0x6B, 0x73, 0x7C);
+		const NVGcolor outText = nvgRGB(0xF2, 0xA9, 0x3B), outSoft = nvgRGB(0x9A, 0xA3, 0xAD);
+		// title strip: the engine and what it does
+		label(vg, bold->handle, in.title, 46.f, 9.f, 3.4f, ink, NVG_ALIGN_LEFT);
+		nvgFontFaceId(vg, bold->handle);
+		nvgFontSize(vg, mm2px(3.4f));
+		nvgTextLetterSpacing(vg, mm2px(3.4f) * 0.05f);
+		float tw = nvgTextBounds(vg, 0, 0, in.title.c_str(), NULL, NULL) / mm2px(1.f);
+		float bx = 46.f + tw + 2.5f;
+		label(vg, plain->handle, in.blurb, bx, 8.8f, 2.3f, soft, NVG_ALIGN_LEFT, std::max(10.f, PANEL_W - 17.f - bx));
+		// aux inputs, aux output, action button
+		for (int j = 0; j < 2; j++) {
+			if (in.auxIn[j].empty()) {
+				label(vg, bold->handle, "-", IN_X[4 + j], 114.9f, 2.9f, soft);
+				continue;
+			}
+			label(vg, bold->handle, in.auxIn[j], IN_X[4 + j], 114.9f, 2.9f, amber, NVG_ALIGN_CENTER, 11.5f);
+			label(vg, plain->handle, in.auxInNote[j], IN_X[4 + j], 126.6f, 2.1f, soft, NVG_ALIGN_CENTER, 11.5f);
+		}
+		label(vg, bold->handle, in.auxOut.empty() ? "-" : in.auxOut, OUT_X[5], 114.9f, 2.9f, outText, NVG_ALIGN_CENTER, 10.5f);
+		label(vg, plain->handle, in.auxOutNote, OUT_X[5], 126.6f, 2.1f, outSoft, NVG_ALIGN_CENTER, 10.5f);
+		label(vg, bold->handle, in.actionLabel, SIDE_X, ACT_Y - 4.6f, 3.2f, amber, NVG_ALIGN_CENTER, 11.f);
+	}
+};
+
 XfWidget::XfWidget(XfModule* module, const Info& info) {
 	using namespace layout;
 	setModule(module);
 	setPanel(createPanel(asset::plugin(pluginInstance, "res/" + info.slug + ".svg")));
+	if (info.multi) {
+		LiveLabels* ll = createWidget<LiveLabels>(Vec(0, 0));
+		ll->box.size = box.size;
+		ll->module = module;
+		ll->fallback = info;
+		addChild(ll);
+	}
 	addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
 	addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
 	addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
@@ -740,7 +810,7 @@ XfWidget::XfWidget(XfModule* module, const Info& info) {
 		XfModule::RUN_PARAM, XfModule::RUN_LIGHT));
 	addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<WhiteLight>>>(mm2px(Vec(SIDE_X, RESET_Y)), module,
 		XfModule::RESET_PARAM, XfModule::RESET_LIGHT));
-	if (!info.action.empty())
+	if (!info.action.empty() || info.multi)
 		addParam(createLightParamCentered<VCVLightButton<MediumSimpleLight<YellowLight>>>(mm2px(Vec(SIDE_X, ACT_Y)), module,
 			XfModule::ACTION_PARAM, XfModule::ACTION_LIGHT));
 
@@ -764,10 +834,10 @@ XfWidget::XfWidget(XfModule* module, const Info& info) {
 	for (int j = 0; j < 4; j++)
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(IN_X[j], JACK_Y)), module, ins[j]));
 	for (int j = 0; j < 2; j++)
-		if (!info.auxIn[j].empty())
+		if (!info.auxIn[j].empty() || info.multi)
 			addInput(createInputCentered<PJ301MPort>(mm2px(Vec(IN_X[4 + j], JACK_Y)), module, XfModule::AUX_INPUT + j));
 	for (int j = 0; j < 6; j++) {
-		if (j == XfModule::AUX_OUTPUT && info.auxOut.empty())
+		if (j == XfModule::AUX_OUTPUT && info.auxOut.empty() && !info.multi)
 			continue;
 		addOutput(createOutputCentered<DarkPJ301MPort>(mm2px(Vec(OUT_X[j], JACK_Y)), module, j));
 	}
@@ -778,9 +848,11 @@ void XfWidget::appendContextMenu(Menu* menu) {
 	if (!m)
 		return;
 	menu->addChild(new MenuSeparator);
-	menu->addChild(createMenuLabel("Settings"));
+	if (m->multi())
+		appendParamItem(menu, m, m->engineParam);
+	menu->addChild(createMenuLabel(m->info->title + " settings"));
 	for (int p = 0; p < (int)m->ad->pages.size(); p++) {
-		int page = p;
+		int page = m->pageBase() + p;
 		menu->addChild(createSubmenuItem(m->ad->pages[p].title, "", [=](Menu* sub) { appendPageMenu(sub, m, page); }));
 	}
 	for (int k = 0; k < NUM_CTRLS; k++)

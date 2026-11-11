@@ -12,3 +12,4 @@ extern Model* modelIndexed;
 extern Model* modelDiscrete;
 extern Model* modelPhaseFlux;
 extern Model* modelFractal;
+extern Model* modelMulti;

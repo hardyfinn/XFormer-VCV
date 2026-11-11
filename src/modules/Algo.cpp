@@ -14,6 +14,7 @@ static Info algoInfo() {
 	i.auxOut = "ACC";
 	i.auxOutNote = "accent gate";
 	i.action = "Reseed";
+	i.actionLabel = "RESEED";
 	return i;
 }
 

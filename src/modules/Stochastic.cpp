@@ -17,6 +17,7 @@ static Info stochasticInfo() {
 	i.auxOut = "SLIDE";
 	i.auxOutNote = "slide gate";
 	i.action = "New rhythm + melody";
+	i.actionLabel = "NEW";
 	return i;
 }
 

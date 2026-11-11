@@ -15,6 +15,7 @@ static Info noteInfo() {
 	i.auxOut = "SLIDE";
 	i.auxOutNote = "slide gate";
 	i.action = "Fill (hold)";
+	i.actionLabel = "FILL";
 	return i;
 }
 

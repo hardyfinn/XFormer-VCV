@@ -17,6 +17,7 @@ static Info fractalInfo() {
 	i.auxOut = "ORN";
 	i.auxOutNote = "trig";
 	i.action = "Record on/off";
+	i.actionLabel = "REC";
 	return i;
 }
 

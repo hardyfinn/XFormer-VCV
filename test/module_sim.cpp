@@ -7,7 +7,7 @@
 
 Plugin* pluginInstance = nullptr;
 
-static void run(Model* model, int ppqn, float bpm, float seconds, const char* name) {
+static int run(Model* model, int ppqn, float bpm, float seconds, const char* name, int engine = -1) {
 	Module* m = model->createModule();
 	xfm::XfModule* x = dynamic_cast<xfm::XfModule*>(m);
 	float sr = 48000.f;
@@ -15,6 +15,11 @@ static void run(Model* model, int ppqn, float bpm, float seconds, const char* na
 	args.sampleRate = sr;
 	args.sampleTime = 1.f / sr;
 	args.frame = 0;
+	// one sample with the clock low first, so the first pulse counts
+	// (Multi: pick the engine through its Engine setting, as the display does)
+	if (engine >= 0)
+		x->params[x->engineParam].setValue((float)engine);
+	x->process(args);
 	x->inputs[xfm::XfModule::CLOCK_INPUT].setChannels(1);
 	int idx = 0;
 	while (xfm::PPQN_VALUES[idx] != ppqn) idx++;
@@ -50,6 +55,59 @@ static void run(Model* model, int ppqn, float bpm, float seconds, const char* na
 	free(s);
 	json_decref(j);
 	delete m;
+	return gates;
+}
+
+// Multi: each engine must play as its own module does, and keep its settings
+// and pattern through a save and load while another engine plays
+static int checkMulti() {
+	Model* models[] = {modelAlgo, modelStochastic, modelNote, modelIndexed, modelDiscrete, modelPhaseFlux, modelFractal};
+	const char* names[] = {"Algo", "Stochastic", "Note", "Indexed", "Discrete", "PhaseFlux", "Fractal"};
+	int bad = 0;
+	for (int i = 0; i < 7; i++) {
+		int a = run(models[i], 4, 120.f, 4.f, names[i]);
+		int b = run(modelMulti, 4, 120.f, 4.f, (std::string("Multi:") + names[i]).c_str(), i);
+		if (a != b) {
+			printf("MISMATCH %s: module %d gates, Multi %d\n", names[i], a, b);
+			bad++;
+		}
+	}
+	Module::ProcessArgs args;
+	args.sampleRate = 48000.f;
+	args.sampleTime = 1.f / 48000.f;
+	xfm::XfModule* x = dynamic_cast<xfm::XfModule*>(modelMulti->createModule());
+	// Note: change a setting and a CTRL destination, then switch to Fractal
+	x->params[x->engineParam].setValue(2.f);
+	x->process(args);
+	int fNote = x->ad->fieldIndex("lastStep");
+	x->params[xfm::XfModule::FIELD_PARAM + fNote].setValue(7.f);
+	x->params[xfm::XfModule::CTRL_DEST_PARAM + 0].setValue(3.f);
+	x->process(args);
+	x->params[x->engineParam].setValue(6.f);
+	x->process(args);
+	int fFr = x->ad->fieldIndex("loopLast");
+	x->params[xfm::XfModule::FIELD_PARAM + fFr].setValue(31.f);
+	x->process(args);
+	json_t* j = x->dataToJson();
+	xfm::XfModule* y = dynamic_cast<xfm::XfModule*>(modelMulti->createModule());
+	y->params[y->engineParam].setValue(6.f);   // as Rack loads the params first
+	y->dataFromJson(j);
+	y->process(args);
+	bool ok = y->cur == 6 && y->params[xfm::XfModule::FIELD_PARAM + fFr].getValue() == 31.f;
+	y->params[y->engineParam].setValue(2.f);
+	y->process(args);
+	ok = ok && y->cur == 2 && y->params[xfm::XfModule::FIELD_PARAM + fNote].getValue() == 7.f
+		&& y->params[xfm::XfModule::CTRL_DEST_PARAM + 0].getValue() == 3.f && y->eff[fNote] == 7;
+	// a fresh engine starts from its defaults
+	y->params[y->engineParam].setValue(4.f);
+	y->process(args);
+	for (int f = 0; f < y->numFields; f++)
+		ok = ok && (int)y->params[xfm::XfModule::FIELD_PARAM + f].getValue() == y->ad->fields[f].def;
+	printf("Multi save/load and switching: %s\n", ok ? "ok" : "FAILED");
+	json_decref(j);
+	delete x;
+	delete y;
+	return bad + (ok ? 0 : 1);
 }
 
 int main() {
@@ -60,5 +118,5 @@ int main() {
 		run(models[i], 4, 120.f, 8.f, names[i]);
 		run(models[i], 24, 120.f, 8.f, names[i]);
 	}
-	return 0;
+	return checkMulti();
 }

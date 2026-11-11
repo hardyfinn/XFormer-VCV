@@ -14,6 +14,15 @@ firmware simulator, so a module plays exactly what the hardware track would.
 | **Discrete** | A sweep crossing 32 note thresholds | INPUT (±5 V) / SCAN (0-10 V) | SWEEP (±5 V) | none |
 | **PhaseFlux** | 16 stages on a 4×4 grid, each a burst of shaped pulses | none | STAGE trig | none |
 | **Fractal** | Records a phrase from gate + CV, loops it and grows branches | REC G gate / REC CV 1 V/oct | ORN trig | Record on/off |
+| **Multi** | Any of the seven above, chosen on the display's ENGINE page | the chosen engine's | the chosen engine's | the chosen engine's |
+
+**Multi** has the same panel as the others, with every jack and the action
+button fitted; the names next to them, and the engine name in the title strip,
+change with the engine. The first display page, ENGINE, picks the engine (also
+in the right-click menu). Each engine keeps its own settings, CTRL assignments
+and pattern while another one plays, and all seven are saved with the patch,
+so switching back picks up where you left it. Switching restarts the
+sequence on the next clock pulse.
 
 ## Installing
 
