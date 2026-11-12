@@ -180,11 +180,38 @@ struct EditWidget : OpaqueWidget {
 	}
 };
 
+// every text a row's value can show, to size the menu to the longest
+static std::vector<std::string> allValues(XfModule* m, int pid) {
+	if (pid >= XfModule::FIELD_PARAM && pid != m->engineParam) {
+		const Field* fd = m->fieldAt(pid - XfModule::FIELD_PARAM);
+		if (!fd)
+			return {};
+		if (!fd->names.empty())
+			return fd->names;
+		return {fd->text(fd->min), fd->text(fd->max)};
+	}
+	return m->rowChoices(pid);
+}
+
 struct Display : EditWidget {
 	std::string fontPath;
-	static constexpr float HEAD = 15.f, ROW_H = 11.f, FOOT = 11.f;
+	static constexpr float HEAD = 15.f, ROW_H = 13.f, FOOT = 11.f, FONT = 11.5f;
 
 	Display() { fontPath = asset::system("res/fonts/ShareTechMono-Regular.ttf"); }
+
+	// the menu's width, worked out once per engine
+	Adapter* sizedFor = nullptr;
+	std::vector<float> pageW;
+	float left = 5.f;
+	static float menuWidth(NVGcontext* vg, XfModule* m, const std::vector<int>& rows) {
+		float labW = 0.f, valW = 0.f;
+		for (int pid : rows) {
+			labW = std::max(labW, nvgTextBounds(vg, 0, 0, m->rowLabel(pid).c_str(), NULL, NULL));
+			for (const std::string& v : allValues(m, pid))
+				valW = std::max(valW, nvgTextBounds(vg, 0, 0, v.c_str(), NULL, NULL));
+		}
+		return labW + nvgTextBounds(vg, 0, 0, " ", NULL, NULL) + valW;
+	}
 
 	int visibleRows() { return std::max(1, (int)((box.size.y - HEAD - FOOT - 1.f) / ROW_H)); }
 
@@ -264,7 +291,28 @@ struct Display : EditWidget {
 		if (m->selected >= m->scroll + vis)
 			m->scroll = m->selected - vis + 1;
 		m->scroll = clamp(m->scroll, 0, std::max(0, n - vis));
-		float fs = 9.5f;
+		// The menu is only as wide as the page needs: the longest label, one
+		// character, then room for the longest value any row can show, so the
+		// eye doesn't travel across empty screen. It sits in the middle.
+		// The labels start at the same place on every page (the widest page of
+		// this engine sits in the middle), so they don't jump when paging.
+		float fs = FONT;
+		nvgFontSize(vg, fs);
+		nvgTextLetterSpacing(vg, 0.f);
+		float badge = 16.f;   // room for a CTRL badge to the right of the values
+		float maxW = W - 2 * pad - badge - 4.f;
+		if (sizedFor != m->ad) {
+			sizedFor = m->ad;
+			pageW.clear();
+			float widest = 0.f;
+			for (int p = 0; p < m->pageCount(); p++) {
+				pageW.push_back(menuWidth(vg, m, m->pageParams(p)));
+				widest = std::max(widest, pageW.back());
+			}
+			left = std::max(pad, (W - std::min(widest, maxW) - badge) / 2.f);
+		}
+		float blockW = std::min(m->page < (int)pageW.size() ? pageW[m->page] : maxW, maxW);
+		float x0 = left, x1 = x0 + blockW;
 		for (int r = m->scroll; r < n && r < m->scroll + vis; r++) {
 			int pid = rows[r];
 			float y = HEAD + (r - m->scroll) * ROW_H;
@@ -272,20 +320,20 @@ struct Display : EditWidget {
 			int own = m->rowOwner(pid);
 			if (sel) {
 				nvgBeginPath(vg);
-				nvgRect(vg, pad - 2.f, y, W - 2 * pad + 4.f, ROW_H);
+				nvgRect(vg, x0 - 3.f, y, x1 - x0 + 6.f, ROW_H);
 				nvgFillColor(vg, AMBER);
 				nvgFill(vg);
 			}
-			text(vg, pad, y + ROW_H * 0.8f, m->rowLabel(pid), sel ? SCREEN : AMBER, fs);
-			text(vg, W - pad - (own ? 16.f : 0.f), y + ROW_H * 0.8f, m->rowValue(pid, true), sel ? SCREEN : (own ? CYAN : AMBER), fs, NVG_ALIGN_RIGHT);
+			text(vg, x0, y + ROW_H * 0.78f, m->rowLabel(pid), sel ? SCREEN : AMBER, fs);
+			text(vg, x1, y + ROW_H * 0.78f, m->rowValue(pid, true), sel ? SCREEN : (own ? CYAN : AMBER), fs, NVG_ALIGN_RIGHT);
 			if (own) {
 				// "C1".."C4": a CTRL knob drives this row
-				float bx = W - pad - 13.f;
+				float bx = x1 + 5.f;
 				nvgBeginPath(vg);
 				nvgRoundedRect(vg, bx, y + 1.5f, 13.f, ROW_H - 3.f, 2.f);
 				nvgFillColor(vg, CYAN);
 				nvgFill(vg);
-				text(vg, bx + 6.5f, y + ROW_H * 0.76f, string::f("C%d", own), SCREEN, fs * 0.85f, NVG_ALIGN_CENTER);
+				text(vg, bx + 6.5f, y + ROW_H * 0.74f, string::f("C%d", own), SCREEN, 9.f, NVG_ALIGN_CENTER);
 			}
 		}
 		if (n > vis) {
