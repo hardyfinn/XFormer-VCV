@@ -7,6 +7,7 @@ namespace xfm {
 
 static const NVGcolor AMBER = nvgRGB(0xff, 0xb3, 0x47);
 static const NVGcolor AMBER_DIM = nvgRGB(0x6a, 0x48, 0x1c);
+static const NVGcolor AMBER_MID = nvgRGB(0xb8, 0x80, 0x36);
 static const NVGcolor CYAN = nvgRGB(0x5f, 0xd0, 0xe4);
 static const NVGcolor CYAN_DIM = nvgRGB(0x1d, 0x4c, 0x55);
 static const NVGcolor SCREEN = nvgRGB(0x0b, 0x0c, 0x0e);
@@ -46,9 +47,23 @@ static void appendParamItem(ui::Menu* menu, XfModule* m, int pid) {
 	menu->addChild(s);
 }
 
+static void appendHelpLines(ui::Menu* menu, const std::string& help) {
+	for (const std::string& line : wrapText(help, 52))
+		menu->addChild(createMenuLabel(line));
+}
+
 static void appendPageMenu(ui::Menu* menu, XfModule* m, int page) {
-	for (int pid : m->pageParams(page))
+	std::vector<int> rows = m->pageParams(page);
+	for (int pid : rows)
 		appendParamItem(menu, m, pid);
+	menu->addChild(new MenuSeparator);
+	menu->addChild(createSubmenuItem("Help", "", [=](ui::Menu* sub) {
+		for (int pid : rows) {
+			std::string h = m->rowHelp(pid);
+			if (!h.empty())
+				sub->addChild(createSubmenuItem(m->rowLabel(pid), "", [=](ui::Menu* s2) { appendHelpLines(s2, h); }));
+		}
+	}));
 }
 
 static void appendCtrlMenu(ui::Menu* menu, XfModule* m, int k) {
@@ -78,6 +93,16 @@ struct EditWidget : OpaqueWidget {
 	Vec pressPos;
 	int editParam = -1;
 	float oldValue = 0.f;
+	// press and hold (without moving) opens the selected row's help
+	bool holding = false;
+	double pressTime = 0.0;
+	static constexpr double HOLD_TIME = 0.45;
+
+	void step() override {
+		if (module && holding && dragMoved < 2.f && system::getTime() - pressTime > HOLD_TIME)
+			module->helpOpen = true;
+		OpaqueWidget::step();
+	}
 
 	void beginEdit() {
 		editParam = module ? module->selectedParam() : -1;
@@ -125,11 +150,15 @@ struct EditWidget : OpaqueWidget {
 			return;
 		dragAccum = 0.f;
 		dragMoved = 0.f;
+		holding = true;
+		pressTime = system::getTime();
 		beginEdit();
 	}
 	void onDragMove(const DragMoveEvent& e) override {
 		if (e.button != GLFW_MOUSE_BUTTON_LEFT)
 			return;
+		if (module && module->helpOpen)
+			return;   // reading the help: the value stays put
 		dragMoved += std::fabs(e.mouseDelta.x) + std::fabs(e.mouseDelta.y);
 		dragAccum += -e.mouseDelta.y;
 		const float pixelsPerStep = 6.f;
@@ -147,6 +176,11 @@ struct EditWidget : OpaqueWidget {
 		if (e.button != GLFW_MOUSE_BUTTON_LEFT)
 			return;
 		endEdit();
+		holding = false;
+		if (module && module->helpOpen) {
+			module->helpOpen = false;
+			return;
+		}
 		if (dragMoved < 2.f)
 			click();
 	}
@@ -282,8 +316,30 @@ struct Display : EditWidget {
 		nvgStrokeWidth(vg, 0.8f);
 		nvgStroke(vg);
 
-		// rows, scrolled so the selected one shows
+		// the engine's status (REC 3, LOCKED, the algorithm...) between the
+		// page title and the clock, cut to the room there is
+		{
+			nvgFontSize(vg, 10.f);
+			float tl = pad + nvgTextBounds(vg, 0, 0, title.c_str(), NULL, NULL) + 6.f;
+			nvgFontSize(vg, 9.f);
+			float cr = W - pad - 7.f - nvgTextBounds(vg, 0, 0, clk.c_str(), NULL, NULL) - 6.f;
+			std::string st = m->ad->status();
+			nvgFontSize(vg, 8.5f);
+			while (!st.empty() && nvgTextBounds(vg, 0, 0, st.c_str(), NULL, NULL) > cr - tl)
+				st.pop_back();
+			text(vg, (tl + cr) / 2.f, 10.5f, st, AMBER_MID, 8.5f, NVG_ALIGN_CENTER);
+		}
+
 		std::vector<int> rows = m->pageParams(m->page);
+		int selPid = rows.empty() ? -1 : rows[clamp(m->selected, 0, (int)rows.size() - 1)];
+		if (m->helpOpen && selPid >= 0) {
+			drawHelpPage(vg, m, selPid, W, H, pad);
+			drawFooter(vg, m, selPid, W, H, pad);
+			nvgResetScissor(vg);
+			return;
+		}
+
+		// rows, scrolled so the selected one shows
 		int n = (int)rows.size(), vis = visibleRows();
 		m->selected = clamp(m->selected, 0, std::max(0, n - 1));
 		if (m->selected < m->scroll)
@@ -355,7 +411,31 @@ struct Display : EditWidget {
 				text(vg, pad, HEAD + 4 * ROW_H, "Now: " + fd->text(m->eff[d]), CYAN, 9.f);
 		}
 
-		// footer: engine status, note playing
+		drawFooter(vg, m, selPid, W, H, pad);
+		nvgResetScissor(vg);
+	}
+
+	// Hold DATA (or the screen): the selected row's name, value and full help
+	void drawHelpPage(NVGcontext* vg, XfModule* m, int pid, float W, float H, float pad) {
+		float y = HEAD + 10.f;
+		text(vg, pad, y, m->rowLabel(pid), AMBER, FONT);
+		text(vg, W - pad, y, m->rowValue(pid, true), CYAN, FONT, NVG_ALIGN_RIGHT);
+		std::string h = m->rowHelp(pid);
+		if (h.empty())
+			h = "No help for this setting yet.";
+		nvgFontSize(vg, 9.f);
+		nvgFillColor(vg, AMBER_MID);
+		nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+		nvgTextLineHeight(vg, 1.15f);
+		nvgTextBox(vg, pad, y + 4.f, W - 2 * pad, h.c_str(), NULL);
+		nvgTextLineHeight(vg, 1.f);
+	}
+
+	// footer: one line of help for the selected row (it scrolls when it is too
+	// long), and the note playing
+	std::string tickerText;
+	double tickerStart = 0.0;
+	void drawFooter(NVGcontext* vg, XfModule* m, int pid, float W, float H, float pad) {
 		float fy = H - 3.5f;
 		nvgBeginPath(vg);
 		nvgMoveTo(vg, pad, H - FOOT);
@@ -363,10 +443,37 @@ struct Display : EditWidget {
 		nvgStrokeColor(vg, AMBER_DIM);
 		nvgStrokeWidth(vg, 0.6f);
 		nvgStroke(vg);
-		text(vg, pad, fy, m->ad->status(), AMBER, 8.5f);
 		std::string note = m->outputs[XfModule::GATE_OUTPUT].getVoltage() > 1.f ? noteName(m->pitchOut) : "";
 		text(vg, W - pad, fy, note, CYAN, 8.5f, NVG_ALIGN_RIGHT);
-		nvgResetScissor(vg);
+		if (m->helpOpen) {
+			text(vg, pad, fy, "release to go back", AMBER_DIM, 8.f);
+			return;
+		}
+		std::string h = pid >= 0 ? m->rowHelp(pid) : "";
+		if (h != tickerText) {
+			tickerText = h;
+			tickerStart = system::getTime();
+		}
+		if (h.empty())
+			return;
+		float right = W - pad - 22.f;   // room for the note name
+		nvgFontSize(vg, 8.f);
+		float tw = nvgTextBounds(vg, 0, 0, h.c_str(), NULL, NULL);
+		float x = pad;
+		if (tw > right - pad) {
+			// hold the start for 2 s, then scroll at 20 px/s, round and round
+			const float gap = 40.f, speed = 20.f;
+			float t = (float)(system::getTime() - tickerStart) - 2.f;
+			if (t > 0.f)
+				x = pad - std::fmod(t * speed, tw + gap);
+			nvgScissor(vg, pad, H - FOOT, right - pad, FOOT);
+			text(vg, x, fy, h, AMBER_MID, 8.f);
+			if (x + tw + gap < right)
+				text(vg, x + tw + gap, fy, h, AMBER_MID, 8.f);
+			nvgScissor(vg, 0, 0, W, H);
+		}
+		else
+			text(vg, x, fy, h, AMBER_MID, 8.f);
 	}
 };
 
@@ -595,6 +702,10 @@ struct Grid : OpaqueWidget {
 			[=](size_t i) { m->gridLane = (int)i; m->gridPage = 0; }));
 		int li = laneIdx();
 		const Lane& l = m->ad->lanes[li];
+		if (!l.help.empty()) {
+			menu->addChild(createMenuLabel(l.label + ":"));
+			appendHelpLines(menu, l.help);
+		}
 		if (!l.readOnly) {
 			int n = count();
 			int first = 0, last = n - 1;

@@ -19,6 +19,7 @@ struct Field {
 	std::vector<std::string> names;  // when set: names[v - min]
 	std::string unit;
 	int shown = 0;
+	std::string help;
 	std::string text(int v) const {
 		if (!names.empty()) {
 			int i = v - min;
@@ -46,6 +47,7 @@ struct Lane {
 	bool readOnly = false;
 	int shown = 0;
 	std::string unit;
+	std::string help;
 	std::string text(int v) const {
 		if (!names.empty()) {
 			int i = v - min;
@@ -86,6 +88,9 @@ std::vector<std::string> divisorNames();
 std::vector<std::string> rootNames();
 std::vector<std::string> runModeNames();
 int divisorIndexOf(int ticks);
+struct Adapter;
+void applyHelp(Adapter* a, const std::string& slug);   // Help.cpp
+std::vector<std::string> wrapText(const std::string& s, size_t width);
 
 // ---------------------------------------------------------------- engine adapter
 
@@ -343,6 +348,9 @@ struct XfModule : Module {
 	bool isCtrlPage(int p) { return p >= ctrlPage(0); }
 	int ctrlOfPage(int p) { return p - ctrlPage(0); }
 	std::vector<std::string> rowChoices(int pid);   // names for a menu, empty = a number
+	std::string rowHelp(int pid);
+	// the panel holds DATA (or the display) down: show the selected row's full help
+	bool helpOpen = false;
 	std::vector<int> pageParams(int p);
 	std::string pageTitle(int p);
 	int selectedParam() {

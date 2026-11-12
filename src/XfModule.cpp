@@ -68,6 +68,7 @@ struct FieldQuantity : ParamQuantity {
 	float getDefaultValue() override { const Field* d = fd(); return d ? (float)d->def : 0.f; }
 	std::string getLabel() override { const Field* d = fd(); return d ? d->label : "(not used by this engine)"; }
 	std::string getUnit() override { return ""; }
+	std::string getDescription() override { const Field* d = fd(); return d ? d->help : ""; }
 	std::string getDisplayValueString() override {
 		const Field* d = fd();
 		if (!d)
@@ -102,6 +103,10 @@ struct CtrlDestQuantity : ParamQuantity {
 		XfModule* m = xfOf(module);
 		const Field* fd = m ? m->fieldAt(m->ctrlDest(k)) : nullptr;
 		return fd ? fd->label : "None";
+	}
+	std::string getDescription() override {
+		XfModule* m = xfOf(module);
+		return m ? m->rowHelp(paramId) : "";
 	}
 };
 
@@ -139,8 +144,10 @@ XfModule::XfModule(const std::vector<Adapter*>& as, const std::vector<Info>& inf
 	slots.resize(adapters.size());
 	ad = adapters[0].get();
 	info = &infos[0];
-	for (auto& a : adapters)
-		maxFields = std::max(maxFields, (int)a->fields.size());
+	for (size_t n = 0; n < adapters.size(); n++) {
+		applyHelp(adapters[n].get(), infos[n].slug);
+		maxFields = std::max(maxFields, (int)adapters[n]->fields.size());
+	}
 	numFields = (int)ad->fields.size();
 	bool isMulti = adapters.size() > 1;
 	config(FIELD_PARAM + maxFields + (isMulti ? 1 : 0), INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
@@ -161,7 +168,7 @@ XfModule::XfModule(const std::vector<Adapter*>& as, const std::vector<Info>& inf
 		dq->randomizeEnabled = false;
 		params[CTRL_DEST_PARAM + k].setValue(dq->getDefaultValue());
 		configSwitch(CTRL_MODE_PARAM + k, 0.f, 1.f, 0.f, string::f("CTRL %d mode", k + 1),
-			{"Offset (noon = the menu value)", "Direct (the knob sets the value)"});
+			{"Offset (noon = the menu value)", "Direct (the knob sets the value)"})->description = rowHelp(CTRL_MODE_PARAM + k);
 		configInput(CTRL_CV_INPUT + k, string::f("CTRL %d CV (+-5 V sweeps the whole knob, scaled by CV amount)", k + 1));
 	}
 	for (int f = 0; f < maxFields; f++) {
@@ -177,6 +184,7 @@ XfModule::XfModule(const std::vector<Adapter*>& as, const std::vector<Info>& inf
 			names.push_back(in.title);
 		SwitchQuantity* q = configSwitch(engineParam, 0.f, (float)(names.size() - 1), 0.f, "Engine", names);
 		q->resetEnabled = false;      // Initialize keeps the engine
+		q->description = "Which of the seven X|FORMER engines plays. Each keeps its own settings, CTRL assignments and pattern while another plays.";
 		q->randomizeEnabled = false;
 	}
 
@@ -400,6 +408,45 @@ std::vector<std::string> XfModule::rowChoices(int pid) {
 		return v;
 	}
 	return {};
+}
+
+std::string XfModule::rowHelp(int pid) {
+	if (pid == engineParam)
+		return "Which engine plays: " + info->title + ", " + info->blurb + ". Each engine keeps its own settings, CTRL assignments and pattern while another plays; switching restarts on the next clock.";
+	if (pid >= FIELD_PARAM) {
+		const Field* fd = fieldAt(pid - FIELD_PARAM);
+		return fd ? fd->help : "";
+	}
+	if (pid >= CTRL_MODE_PARAM)
+		return "Offset: the knob at noon leaves the setting as the menu has it, and turns it down or up from there. Direct: the knob sets the value over its whole range. CV adds to the knob either way.";
+	if (pid >= CTRL_DEST_PARAM)
+		return "The setting this CTRL knob and its CV input move. The display marks that row with a C badge and shows the value the knob gives.";
+	return "";
+}
+
+std::vector<std::string> wrapText(const std::string& s, size_t width) {
+	std::vector<std::string> lines;
+	std::string line, word;
+	auto flush = [&]() {
+		if (word.empty())
+			return;
+		if (!line.empty() && line.size() + 1 + word.size() > width) {
+			lines.push_back(line);
+			line.clear();
+		}
+		line += (line.empty() ? "" : " ") + word;
+		word.clear();
+	};
+	for (char c : s) {
+		if (c == ' ')
+			flush();
+		else
+			word += c;
+	}
+	flush();
+	if (!line.empty())
+		lines.push_back(line);
+	return lines;
 }
 
 int XfModule::rowOwner(int pid) {

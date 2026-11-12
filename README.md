@@ -37,6 +37,12 @@ and drop it into your Rack 2 plugins folder
   next row. Click the left or right half of the display header, or the
   `< PAGE >` buttons, to change page. You can also scroll the mouse wheel over
   the display (shift for ×10).
+* **Help.** The bottom line of the display explains the selected row (long
+  text scrolls). Hold the DATA encoder, or press and hold on the display, to
+  see the full help for that row; let go to return. The same text is in each
+  setting's tooltip and under Help in the right-click page menus, and the
+  grid's right-click menu explains the lane it shows. The engine's status
+  (REC, LOCKED, the algorithm...) is at the top of the display.
 * **Grid.** Shows the pattern; click or drag to paint values, scroll to nudge
   one step. Click the grid header to switch lane (Note, Gate, Probability...)
   or 32-step page. Right-click for lane choice, randomise and fill.
