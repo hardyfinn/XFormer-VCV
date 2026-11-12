@@ -13,23 +13,23 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 FONT_BOLD = os.environ.get("PANEL_FONT_BOLD", "/usr/share/fonts/opentype/inter/Inter-Bold.otf")
 FONT_MED = os.environ.get("PANEL_FONT_MED", "/usr/share/fonts/opentype/inter/Inter-Medium.otf")
 
-W, H = 152.4, 128.5  # 30 HP
+W, H = 132.08, 128.5  # 26 HP
 
 BG, BG_DARK, INK, SOFT = "#F2F0EB", "#E0DCD3", "#1E2126", "#6B737C"
 AMBER, CYAN, OUTBOX, OUT_TEXT = "#C2730F", "#17879C", "#1E2126", "#F2A93B"
 
 # --- keep in step with src/Layout.hpp
-DISP_X, DISP_Y, DISP_W, DISP_H = 6.0, 12.0, 92.0, 40.0
-ENC_X, ENC_Y, ENC_SIZE = 114.0, 26.0, 16.0
-PAGE_PREV_X, PAGE_NEXT_X, PAGE_Y = 106.5, 121.5, 45.0
-SIDE_X, RUN_Y, RESET_Y, ACT_Y = 140.5, 19.0, 32.0, 45.0
-GRID_X, GRID_Y, GRID_W, GRID_H = 6.0, 55.5, 140.4, 33.5
-CTRL_X0, CTRL_DX = 6.0, 35.1
-CTRL_KNOB_DX, CTRL_BTN_DX, CTRL_JACK_DX = 8.0, 18.5, 28.5
+DISP_X, DISP_Y, DISP_W, DISP_H = 6.0, 12.0, 71.7, 46.0
+ENC_X, ENC_Y, ENC_SIZE = 93.68, 26.0, 16.0
+PAGE_PREV_X, PAGE_NEXT_X, PAGE_Y = 86.18, 101.18, 45.0
+SIDE_X, RUN_Y, RESET_Y, ACT_Y = 120.18, 19.0, 32.0, 45.0
+GRID_X, GRID_Y, GRID_W, GRID_H = 6.0, 62.5, 120.08, 25.5
+CTRL_X0, CTRL_DX = 6.0, 30.02
+CTRL_KNOB_DX, CTRL_BTN_DX, CTRL_JACK_DX = 6.84, 15.82, 24.38
 CTRL_Y, CTRL_BTN_Y, CTRL_ATT_Y = 101.5, 97.3, 105.6
 JACK_Y = 120.0
-IN_X = [10.0, 22.0, 34.0, 46.0, 58.0, 70.0]
-OUT_X = [84.0, 95.0, 106.0, 117.0, 128.0, 139.0]
+IN_X = [9.5, 19.8, 30.1, 40.4, 50.7, 61.0]
+OUT_X = [73.0, 83.0, 93.0, 103.0, 113.0, 123.0]
 JACK_LABEL_Y = 114.9
 FOOT_Y = 126.6
 
@@ -126,18 +126,18 @@ def panel(mod):
     # jacks
     line(4.0, 110.0, W - 4.0, 110.0, AMBER, 0.25, 'opacity="0.5"')
     for x, lab, note in zip(IN_X, ["CLOCK", "RESET", "RUN", "V/OCT"], ["", "", "trig", "transp."]):
-        add(text(lab, x, JACK_LABEL_Y, 2.9, FONT_BOLD, INK))
+        add(text(lab, x, JACK_LABEL_Y, 2.9, FONT_BOLD, INK, spacing=0.0))
         if note:
             add(text(note, x, FOOT_Y, 2.1, FONT_MED, SOFT))
     for j, a in enumerate(mod["aux_in"]):
         if a:
-            add(text(a[0], IN_X[4 + j], JACK_LABEL_Y, 2.9, FONT_BOLD, AMBER))
+            add(text(a[0], IN_X[4 + j], JACK_LABEL_Y, 2.9, FONT_BOLD, AMBER, spacing=0.0))
             add(text(a[1], IN_X[4 + j], FOOT_Y, 2.1, FONT_MED, SOFT))
-    add(f'<rect x="{OUT_X[0] - 6.0}" y="111.2" width="{OUT_X[5] - OUT_X[0] + 12.0}" height="16.4" rx="1.2" fill="{OUTBOX}"/>')
+    add(f'<rect x="{OUT_X[0] - 5.0}" y="111.2" width="{OUT_X[5] - OUT_X[0] + 10.0}" height="16.4" rx="1.2" fill="{OUTBOX}"/>')
     outs = ["GATE", "PITCH", "VEL", "TRIG", "EOC", mod["aux_out"][0] if mod["aux_out"] else None]
     for x, lab in zip(OUT_X, outs):
         if lab:
-            add(text(lab, x, JACK_LABEL_Y, 2.9, FONT_BOLD, OUT_TEXT))
+            add(text(lab, x, JACK_LABEL_Y, 2.9, FONT_BOLD, OUT_TEXT, spacing=0.0))
     if mod["aux_out"]:
         add(text(mod["aux_out"][1], OUT_X[5], FOOT_Y, 2.1, FONT_MED, "#9AA3AD"))
     add(text("OUT", (OUT_X[1] + OUT_X[2]) / 2 + 5.5, FOOT_Y, 2.1, FONT_MED, "#9AA3AD", spacing=0.1))

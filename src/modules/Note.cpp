@@ -9,7 +9,7 @@ static Info noteInfo() {
 	Info i;
 	i.slug = "Note";
 	i.title = "NOTE";
-	i.blurb = "64-step sequencer with probabilities and conditions";
+	i.blurb = "64-step sequencer with probabilities";
 	i.auxIn[0] = "FILL";
 	i.auxInNote[0] = "gate";
 	i.auxOut = "SLIDE";

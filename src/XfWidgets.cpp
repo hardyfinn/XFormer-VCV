@@ -782,7 +782,7 @@ struct LiveLabels : TransparentWidget {
 			return;
 		nvgFontFaceId(vg, face);
 		nvgFontSize(vg, mm2px(size));
-		nvgTextLetterSpacing(vg, mm2px(size) * 0.05f);
+		nvgTextLetterSpacing(vg, 0.f);
 		if (maxW > 0.f) {
 			float w = nvgTextBounds(vg, 0, 0, s.c_str(), NULL, NULL);
 			if (w > mm2px(maxW)) {
@@ -807,7 +807,7 @@ struct LiveLabels : TransparentWidget {
 		label(vg, bold->handle, in.title, 46.f, 9.f, 3.4f, ink, NVG_ALIGN_LEFT);
 		nvgFontFaceId(vg, bold->handle);
 		nvgFontSize(vg, mm2px(3.4f));
-		nvgTextLetterSpacing(vg, mm2px(3.4f) * 0.05f);
+		nvgTextLetterSpacing(vg, 0.f);
 		float tw = nvgTextBounds(vg, 0, 0, in.title.c_str(), NULL, NULL) / mm2px(1.f);
 		float bx = 46.f + tw + 2.5f;
 		label(vg, plain->handle, in.blurb, bx, 8.8f, 2.3f, soft, NVG_ALIGN_LEFT, std::max(10.f, PANEL_W - 17.f - bx));
@@ -817,11 +817,11 @@ struct LiveLabels : TransparentWidget {
 				label(vg, bold->handle, "-", IN_X[4 + j], 114.9f, 2.9f, soft);
 				continue;
 			}
-			label(vg, bold->handle, in.auxIn[j], IN_X[4 + j], 114.9f, 2.9f, amber, NVG_ALIGN_CENTER, 11.5f);
-			label(vg, plain->handle, in.auxInNote[j], IN_X[4 + j], 126.6f, 2.1f, soft, NVG_ALIGN_CENTER, 11.5f);
+			label(vg, bold->handle, in.auxIn[j], IN_X[4 + j], 114.9f, 2.9f, amber, NVG_ALIGN_CENTER, 9.6f);
+			label(vg, plain->handle, in.auxInNote[j], IN_X[4 + j], 126.6f, 2.1f, soft, NVG_ALIGN_CENTER, 9.6f);
 		}
-		label(vg, bold->handle, in.auxOut.empty() ? "-" : in.auxOut, OUT_X[5], 114.9f, 2.9f, outText, NVG_ALIGN_CENTER, 10.5f);
-		label(vg, plain->handle, in.auxOutNote, OUT_X[5], 126.6f, 2.1f, outSoft, NVG_ALIGN_CENTER, 10.5f);
+		label(vg, bold->handle, in.auxOut.empty() ? "-" : in.auxOut, OUT_X[5], 114.9f, 2.9f, outText, NVG_ALIGN_CENTER, 9.6f);
+		label(vg, plain->handle, in.auxOutNote, OUT_X[5], 126.6f, 2.1f, outSoft, NVG_ALIGN_CENTER, 9.6f);
 		label(vg, bold->handle, in.actionLabel, SIDE_X, ACT_Y - 4.6f, 3.2f, amber, NVG_ALIGN_CENTER, 11.f);
 	}
 };

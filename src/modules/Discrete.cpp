@@ -10,7 +10,7 @@ static Info discreteInfo() {
 	Info i;
 	i.slug = "Discrete";
 	i.title = "DISCRETE";
-	i.blurb = "a sweep crossing 32 note thresholds";
+	i.blurb = "a sweep crossing 32 thresholds";
 	i.auxIn[0] = "INPUT";
 	i.auxInNote[0] = "+-5 V";
 	i.auxIn[1] = "SCAN";

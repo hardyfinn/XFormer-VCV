@@ -9,7 +9,7 @@ static Info indexedInfo() {
 	Info i;
 	i.slug = "Indexed";
 	i.title = "INDEXED";
-	i.blurb = "steps with their own durations, two mod inputs";
+	i.blurb = "steps with their own durations";
 	i.auxIn[0] = "MOD A";
 	i.auxInNote[0] = "+-5 V";
 	i.auxIn[1] = "MOD B";

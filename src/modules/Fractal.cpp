@@ -9,7 +9,7 @@ static Info fractalInfo() {
 	Info i;
 	i.slug = "Fractal";
 	i.title = "FRACTAL";
-	i.blurb = "a phrase looper that grows branches";
+	i.blurb = "a phrase looper that grows";
 	i.auxIn[0] = "REC G";
 	i.auxInNote[0] = "gate";
 	i.auxIn[1] = "REC CV";
