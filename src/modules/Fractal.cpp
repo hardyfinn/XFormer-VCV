@@ -181,4 +181,4 @@ struct FractalAdapter : EngineAdapter<xf::FractalEngine> {
 
 }  // namespace xfm
 
-XF_MODEL(Fractal, xfm::FractalAdapter, xfm::fractalInfo)
+XF_ENGINE(Fractal, xfm::FractalAdapter, xfm::fractalInfo)

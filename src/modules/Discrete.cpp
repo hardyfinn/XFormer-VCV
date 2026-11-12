@@ -145,4 +145,4 @@ struct DiscreteAdapter : EngineAdapter<xf::DiscreteEngine> {
 
 }  // namespace xfm
 
-XF_MODEL(Discrete, xfm::DiscreteAdapter, xfm::discreteInfo)
+XF_ENGINE(Discrete, xfm::DiscreteAdapter, xfm::discreteInfo)

@@ -184,4 +184,4 @@ struct IndexedAdapter : EngineAdapter<xf::IndexedEngine> {
 
 }  // namespace xfm
 
-XF_MODEL(Indexed, xfm::IndexedAdapter, xfm::indexedInfo)
+XF_ENGINE(Indexed, xfm::IndexedAdapter, xfm::indexedInfo)

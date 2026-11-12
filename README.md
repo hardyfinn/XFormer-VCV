@@ -1,11 +1,19 @@
 # X|FORMER for VCV Rack
 
-Seven sequencer modules for VCV Rack 2, ported from the track engines of the
-X|FORMER Eurorack firmware (itself based on PER|FORMER by Simon Kallweit).
-Each engine is a line-for-line C++ port, checked against traces from the
-firmware simulator, so a module plays exactly what the hardware track would.
+**Multi**, one sequencer module for VCV Rack 2 that holds the seven track
+engines of the X|FORMER Eurorack firmware (itself based on PER|FORMER by
+Simon Kallweit). Each engine is a line-for-line C++ port, checked against
+traces from the firmware simulator, so it plays exactly what the hardware
+track would.
 
-| Module | What it does | Aux in 1 / 2 | Aux out | Button |
+The first display page, ENGINE, picks the engine (also in the right-click
+menu). The names by the two aux inputs, the aux output and the action button,
+and the engine name in the title strip, change with the engine. Each engine
+keeps its own settings, CTRL assignments and pattern while another one plays,
+and all seven are saved with the patch, so switching back picks up where you
+left it. Switching restarts the sequence on the next clock pulse.
+
+| Engine | What it does | Aux in 1 / 2 | Aux out | Button |
 |---|---|---|---|---|
 | **Algo** | 16 generative melody algorithms (the Tuesday track) | RESEED trig | ACC (accent gate) | Reseed |
 | **Stochastic** | Rhythm and melody rolled from weighted dice | NEW R / NEW M trig | SLIDE gate | New rhythm + melody |
@@ -14,15 +22,6 @@ firmware simulator, so a module plays exactly what the hardware track would.
 | **Discrete** | A sweep crossing 32 note thresholds | INPUT (±5 V) / SCAN (0-10 V) | SWEEP (±5 V) | none |
 | **PhaseFlux** | 16 stages on a 4×4 grid, each a burst of shaped pulses | none | STAGE trig | none |
 | **Fractal** | Records a phrase from gate + CV, loops it and grows branches | REC G gate / REC CV 1 V/oct | ORN trig | Record on/off |
-| **Multi** | Any of the seven above, chosen on the display's ENGINE page | the chosen engine's | the chosen engine's | the chosen engine's |
-
-**Multi** has the same panel as the others, with every jack and the action
-button fitted; the names next to them, and the engine name in the title strip,
-change with the engine. The first display page, ENGINE, picks the engine (also
-in the right-click menu). Each engine keeps its own settings, CTRL assignments
-and pattern while another one plays, and all seven are saved with the patch,
-so switching back picks up where you left it. Switching restarts the
-sequence on the next clock pulse.
 
 ## Installing
 
@@ -31,7 +30,7 @@ Download `XFormer-2.x.x-mac-arm64.vcvplugin` from the
 and drop it into your Rack 2 plugins folder
 (`~/Library/Application Support/Rack2/plugins-mac-arm64/`), then restart Rack.
 
-## The panel (all seven modules share it)
+## The panel
 
 * **Display + DATA encoder.** The display shows one settings page at a time.
   Turn (drag) the encoder to change the selected row, click it to move to the
@@ -50,7 +49,7 @@ and drop it into your Rack 2 plugins folder
   ±5 V on the CV jack sweeps the full range. A CTRL'd row shows a `C1`-`C4`
   badge in the display.
 * **RUN / RESET / action button.** RUN toggles playback, RESET returns to the
-  start, the amber button does the module's action (see table).
+  start, the amber button does the engine's action (see table).
 
 ### Clock
 
@@ -65,14 +64,14 @@ enough. **RESET** and **RUN** (a trigger toggles run, like the button) inputs ar
 ### Outputs
 
 GATE, PITCH (1 V/oct, with slide where the engine slides), VEL (0-10 V),
-TRIG (1 ms per note), EOC (end of cycle/pattern) and the module's aux output.
+TRIG (1 ms per note), EOC (end of cycle/pattern) and the engine's aux output.
 
 ## Building
 
 ```
 make RACK_DIR=<Rack-SDK>        # or: make dist
 test/golden.sh                  # checks every engine against firmware traces
-python3 res/make_panels.py      # redraws the panels (needs fonttools + Inter)
+python3 res/make_panels.py      # redraws the panel (needs fonttools + Inter)
 ```
 
 GitHub Actions builds the mac-arm64 plugin on every push to `main` and puts

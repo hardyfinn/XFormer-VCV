@@ -234,4 +234,4 @@ struct StochasticAdapter : EngineAdapter<xf::StochasticEngine> {
 
 }  // namespace xfm
 
-XF_MODEL(Stochastic, xfm::StochasticAdapter, xfm::stochasticInfo)
+XF_ENGINE(Stochastic, xfm::StochasticAdapter, xfm::stochasticInfo)

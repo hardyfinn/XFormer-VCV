@@ -153,4 +153,4 @@ struct NoteAdapter : EngineAdapter<xf::NoteEngine> {
 
 }  // namespace xfm
 
-XF_MODEL(Note, xfm::NoteAdapter, xfm::noteInfo)
+XF_ENGINE(Note, xfm::NoteAdapter, xfm::noteInfo)

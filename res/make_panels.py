@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Draws the eight panels res/<Module>.svg. VCV Rack can't draw SVG <text>, so
+# Draws the panel res/<Module>.svg. VCV Rack can't draw SVG <text>, so
 # every label is turned into outline paths with fontTools. Positions are in mm
 # and must match src/Layout.hpp.
 #   pip install fonttools
@@ -151,5 +151,8 @@ def panel(mod):
     print("wrote " + mod["slug"] + ".svg")
 
 
+# Only Multi is built now; the seven single-engine panels stay listed above
+# for reference (their labels are what Multi draws live).
 for m in MODULES:
-    panel(m)
+    if m["slug"] == "Multi":
+        panel(m)

@@ -128,4 +128,4 @@ struct AlgoAdapter : EngineAdapter<xf::TuesdayEngine> {
 
 }  // namespace xfm
 
-XF_MODEL(Algo, xfm::AlgoAdapter, xfm::algoInfo)
+XF_ENGINE(Algo, xfm::AlgoAdapter, xfm::algoInfo)

@@ -58,20 +58,10 @@ static int run(Model* model, int ppqn, float bpm, float seconds, const char* nam
 	return gates;
 }
 
-// Multi: each engine must play as its own module does, and keep its settings
-// and pattern through a save and load while another engine plays
+// Multi keeps each engine's settings and pattern through a save and load
+// while another engine plays
 static int checkMulti() {
-	Model* models[] = {modelAlgo, modelStochastic, modelNote, modelIndexed, modelDiscrete, modelPhaseFlux, modelFractal};
-	const char* names[] = {"Algo", "Stochastic", "Note", "Indexed", "Discrete", "PhaseFlux", "Fractal"};
 	int bad = 0;
-	for (int i = 0; i < 7; i++) {
-		int a = run(models[i], 4, 120.f, 4.f, names[i]);
-		int b = run(modelMulti, 4, 120.f, 4.f, (std::string("Multi:") + names[i]).c_str(), i);
-		if (a != b) {
-			printf("MISMATCH %s: module %d gates, Multi %d\n", names[i], a, b);
-			bad++;
-		}
-	}
 	Module::ProcessArgs args;
 	args.sampleRate = 48000.f;
 	args.sampleTime = 1.f / 48000.f;
@@ -111,12 +101,11 @@ static int checkMulti() {
 }
 
 int main() {
-	Model* models[] = {modelAlgo, modelStochastic, modelNote, modelIndexed, modelDiscrete, modelPhaseFlux, modelFractal};
 	const char* names[] = {"Algo", "Stochastic", "Note", "Indexed", "Discrete", "PhaseFlux", "Fractal"};
 	for (int i = 0; i < 7; i++) {
-		run(models[i], 1, 120.f, 8.f, names[i]);
-		run(models[i], 4, 120.f, 8.f, names[i]);
-		run(models[i], 24, 120.f, 8.f, names[i]);
+		run(modelMulti, 1, 120.f, 8.f, names[i], i);
+		run(modelMulti, 4, 120.f, 8.f, names[i], i);
+		run(modelMulti, 24, 120.f, 8.f, names[i], i);
 	}
 	return checkMulti();
 }

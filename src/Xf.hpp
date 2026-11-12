@@ -384,14 +384,8 @@ struct XfWidget : ModuleWidget {
 
 }  // namespace xfm
 
-// one model per module, at file scope: XF_MODEL(Algo, xfm::AlgoAdapter, xfm::algoInfo)
-#define XF_MODEL(NAME, ADAPTER, INFO)                                      \
-	struct NAME##Module : xfm::XfModule {                                  \
-		NAME##Module() : xfm::XfModule(new ADAPTER, INFO()) {}             \
-	};                                                                      \
-	xfm::Adapter* xfmMake##NAME() { return new ADAPTER; }                  \
-	xfm::Info xfmInfo##NAME() { return INFO(); }                           \
-	struct NAME##Widget : xfm::XfWidget {                                  \
-		NAME##Widget(NAME##Module* m) : xfm::XfWidget(m, INFO()) {}        \
-	};                                                                      \
-	Model* model##NAME = createModel<NAME##Module, NAME##Widget>(#NAME);
+// One engine per file, at file scope: XF_ENGINE(Algo, xfm::AlgoAdapter, xfm::algoInfo)
+// gives the Multi module a way to make it and read its panel labels.
+#define XF_ENGINE(NAME, ADAPTER, INFO)                       \
+	xfm::Adapter* xfmMake##NAME() { return new ADAPTER; }    \
+	xfm::Info xfmInfo##NAME() { return INFO(); }

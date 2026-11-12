@@ -3,16 +3,16 @@
 // settings, CTRL assignments and pattern while another one is playing.
 #include "../Xf.hpp"
 
-#define XF_ENGINE(NAME)              \
+#define XF_DECLARE(NAME)              \
 	xfm::Adapter* xfmMake##NAME();   \
 	xfm::Info xfmInfo##NAME();
-XF_ENGINE(Algo)
-XF_ENGINE(Stochastic)
-XF_ENGINE(Note)
-XF_ENGINE(Indexed)
-XF_ENGINE(Discrete)
-XF_ENGINE(PhaseFlux)
-XF_ENGINE(Fractal)
+XF_DECLARE(Algo)
+XF_DECLARE(Stochastic)
+XF_DECLARE(Note)
+XF_DECLARE(Indexed)
+XF_DECLARE(Discrete)
+XF_DECLARE(PhaseFlux)
+XF_DECLARE(Fractal)
 
 namespace xfm {
 

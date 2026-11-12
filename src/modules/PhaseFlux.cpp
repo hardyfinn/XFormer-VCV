@@ -155,4 +155,4 @@ struct PhaseFluxAdapter : EngineAdapter<xf::PhaseFluxEngine> {
 
 }  // namespace xfm
 
-XF_MODEL(PhaseFlux, xfm::PhaseFluxAdapter, xfm::phaseFluxInfo)
+XF_ENGINE(PhaseFlux, xfm::PhaseFluxAdapter, xfm::phaseFluxInfo)
