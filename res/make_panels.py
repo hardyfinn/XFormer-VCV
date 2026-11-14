@@ -156,3 +156,9 @@ def panel(mod):
 for m in MODULES:
     if m["slug"] == "Multi":
         panel(m)
+
+# --- Haer maker logo (res/haer_logo.py), placed clear of the jacks and rail artwork
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import haer_logo
+haer_logo.add_to_file(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "Multi.svg"), x=59.32, y=126.6, cap=2.6, bg='#F2F0EB')
