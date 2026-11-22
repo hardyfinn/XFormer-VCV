@@ -85,5 +85,5 @@ it on the `latest` release.
 
 ## License
 
-GPL-3.0-or-later. The engines are derived from PER|FORMER (MIT, © 2017-2018
+GPL-3.0-or-later (full text in `LICENSE-GPL-3.0.txt`). The engines are derived from PER|FORMER (MIT, © 2017-2018
 Simon Kallweit); see LICENSE.txt.
